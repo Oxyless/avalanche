@@ -1,0 +1,355 @@
+#header
+  table
+    tr
+      td
+        | Avalanche [[LOGO]]
+      td.td_menu_tab.active        
+        a href="#"
+          | RESUMÉ
+      td.td_menu_tab
+        a href="#"
+          | PLANIFIÉS
+      td.td_menu_tab
+        a href="#"
+          | CRONS
+      td.td_menu_tab
+        a href="#"
+          | EN QUEUE
+      td.td_menu_tab
+        a href="#"
+          | EN COURS
+      td.td_menu_tab
+        a href="#"
+          | EXECUTE
+        
+#jobs
+  h3
+    a href="#"
+      | Planifiés
+
+  table
+    tr
+      th
+        | Queue
+      th
+        | ID
+      th
+        | Action
+      th
+        | Paramètres
+      th
+        | Planifié
+      th
+        | Action
+    tr
+      td.td_color2
+      td
+        a href="#"
+          | #423223
+      td
+        | Calcul des mots clés
+      td 
+        | campaign_32, "avis produit"
+      td
+        = I18n.l Time.current + 10.day
+      td
+        a href="#"
+          | Supprimer
+                
+    tr
+      td.td_color3
+      td
+       a href="#"
+          | #47
+      td 
+        | Email d'Insatisfaction
+      td 
+        | 324434334
+      td
+        = I18n.l Time.current + 5.day
+      td 
+        a href="#"
+          | Supprimer
+
+    tr
+      td.td_color4
+      td
+        a href="#"
+          | #49
+      td  
+        | Rapport de corinne
+      td 
+        | 432443
+      td 
+        = I18n.l Time.current + 3.day
+      td 
+        a href="#"
+          | Supprimer
+
+    tr
+      td.td_color1
+      td
+        a href="#"
+          | #50
+      td
+        | Envoi enquête 1
+      td 
+        | 43232423, perform
+      td 
+        = I18n.l Time.current + 2.day
+      td 
+        a href="#"
+          | Supprimer
+        
+    tr
+      td.td_color1
+      td
+        a href="#"
+          | #52
+      td
+        | Envoi enquête 2
+      td 
+        | 987987, perform
+      td 
+        = I18n.l Time.current + 1.day
+      td 
+        a href="#"
+          | Supprimer
+
+#queues
+  h3
+    a href="#"
+      | En Queue
+
+  table
+    tr
+      th.td_color1
+        | Queue email
+        
+      th.td_color2
+        | Queue hard
+        
+      th.td_color3
+        | Queue soft
+        
+      th.td_color4
+        | Queue rapports
+        
+    tr
+      td
+        a href="#"
+          | 3345
+      td
+        a href="#"
+          | 12
+      td
+        a href="#"
+          | 0
+      td  
+        a href="#"
+          | 142
+
+#workers
+  h3
+    a href="#"
+      | En cours d'éxécution
+
+  table#workers
+    tr
+      th
+        | W1
+      th
+        | W2
+      th 
+        | W3
+      th  
+        | W4
+      th
+        | W5
+      th
+        | W6
+      th 
+        | W7
+      th  
+        | W8
+
+    tr
+      td.td_worker
+        table
+          tr
+            td.td_color1
+            td.td_color2
+                      
+      td.td_worker
+        table
+          tr
+            td.td_color1
+      td.td_worker
+        table
+          tr
+            td.td_color1
+            td.td_color2
+            td.td_color3
+            td.td_color4
+      td.td_worker  
+        table
+          tr
+            td.td_color4
+      td.td_worker
+        table
+          tr
+            td.td_color2
+      td.td_worker
+        table
+          tr
+            td.td_color3
+            td.td_color4
+      td.td_worker
+        table
+          tr
+            td.td_color2
+      td.td_worker  
+        table
+          tr
+            td.td_color1
+
+    tr
+      td
+        a href="#"
+          | 2 / 4
+      td
+        a href="#"
+          | 1 / 4
+      td 
+        a href="#"
+          | 0 / 4
+      td  
+        a href="#"
+          | 2 / 4
+      td
+        a href="#"
+          | 4 / 8
+      td
+        a href="#"
+          | 2 / 4
+      td 
+        a href="#"
+          | 1 / 4
+      td
+        a href="#"
+          | 0 / 4
+
+    tr
+      td
+        | Alive
+      td
+        | Running
+      td 
+        | Paused
+      td  
+        | Alive
+      td
+        | Alive
+      td
+        | Restarted
+      td 
+        | Stopped
+      td
+        | new
+
+#status
+  h3
+    a href="#"
+      | Exécuté (cette semaine)
+      
+  table
+    tr
+      th
+        | DONE
+      th
+        | RUNNING
+      th
+        | FAILED
+      th
+        | KILLED   
+      th
+        | TIMEOUT
+      th
+        | DEAD
+      th
+        | TENTATIVES
+
+    tr
+      td.td_consumed
+        a href="#"
+          | 123
+      td.td_consumed
+        a href="#"
+          | 63
+      td.td_consumed
+        a href="#"
+          | 0
+      td.td_consumed
+        a href="#"
+          | 2
+      td.td_consumed
+        a href="#"
+          | 1230
+      td.td_consumed
+        a href="#"
+          | 632
+      td.td_consumed
+        a href="#"
+          | 42
+
+#footer
+  h4
+    | Avalanche version 1.4
+
+sass:
+  h3
+    margin-bottom: 5px
+  
+  table
+    width: 100%
+    border-spacing : 0
+    border-collapse : collapse
+    
+    td, th
+      border: 1px solid grey
+      padding: 8px
+      
+    .td_color1, .td_color2, .td_color3, .td_color4
+      
+    .td_color1
+      background-color: red
+      
+    .td_color2
+      background-color: green
+
+    .td_color3
+      background-color: blue
+    
+    .td_color4
+      background-color: yellow
+      
+    .td_worker
+      width: 12.5%
+      
+    .td_menu_tab
+      width: 12%
+      text-align: center
+      
+      &.active
+        background-color: grey
+        
+        a
+          color: white
+        
+    .td_consumed
+      width: 14%
+
+  #queues, #workers, #status
+    table
+      td
+        text-align: center
