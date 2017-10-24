@@ -1,0 +1,243 @@
+$primary-font: Helvetica, sans-serif
+
+$primary-color: #3C3C3C
+
+$bg-color-table-head: #DDDDDD
+$bg-color-table-even: #F7F7F7
+$bg-color-table-odd: #FFFFFF
+
+$bg-color1: #2DB3AB
+$bg-color2: #166989
+$bg-color3: #5656BF
+$bg-color4: #E89F1C
+$bg-color5: #BC276D
+$bg-color6: #7F2663
+$bg-color7: #1E8DD3
+$bg-color8: #ED6A5A
+
+$link-color: #0D6ECD
+$link-hover-color: #000000
+
+$error-color: #C84043
+
+$menu-color-active: #2DB3AB
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video
+  margin: 0
+  padding: 0
+  border: 0
+  font-size: 100%
+  font: inherit
+  vertical-align: baseline
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section
+  display: block
+
+body
+  line-height: 1
+
+ol, ul
+  list-style: none
+
+blockquote, q
+  quotes: none
+
+blockquote:before, blockquote:after,
+q:before, q:after
+  content: ''
+  content: none
+
+table
+  border-collapse: collapse
+  border-spacing: 0
+
+// Avalanche
+
+body.avl-body
+  font-family: $primary-font
+  color: $primary-color
+  font-size: 13px
+  background-color: #F4F5F7
+  min-width: 1024px
+
+h3.avl-h3
+  padding-bottom: 8px
+  font-weight: bold
+
+.avl-blocs
+  padding: 20px
+  position: relative
+
+.avl-bloc, .avl-bloc-half
+  box-sizing: border-box
+  padding: 20px
+
+.avl-bloc-half
+  width: 50%
+  display: inline-block
+
+.avl-tabs
+  font-size: 15px
+  border-bottom: 1px solid $primary-color
+  margin-left: 20px
+  margin-right: 20px
+
+  .avl-tab
+    display: inline-block
+    margin-right: 50px
+    padding-left: 10px
+    padding-right: 10px
+    padding-bottom: 8px
+    border-bottom: 3px solid transparent
+    position: relative
+    top: 2px
+
+    &.avl-active
+      border-bottom: 3px solid $menu-color-active
+      color: $menu-color-active
+
+    &:hover
+      cursor: pointer
+      color: $menu-color-active
+
+
+.avl-error-bloc
+  color: $error-color
+  position: absolute
+  right: 0px
+  top: 10px
+  background-color: white
+  width: 275px
+  box-sizing: border-box
+  padding: 20px
+  -webkit-box-shadow: -5px 1px 23px 0px rgba(0,0,0,0.19)
+  -moz-box-shadow: -5px 1px 23px 0px rgba(0,0,0,0.19)
+  box-shadow: -5px 1px 23px 0px rgba(0,0,0,0.19)
+
+.avl-btn-success, .avl-btn-danger, .avl-btn
+  display: inline-block
+  padding: 10px 15px
+  color: white
+  cursor: pointer
+  border-radius: 4px
+  user-select: none
+  border: none
+  outline: none
+  box-shadow: none
+
+  a
+    color: inherit
+    text-decoration: inherit
+
+.avl-btn
+  background-color: #1E7FA4
+  font-size: 13px
+
+  &:hover
+    background-color: #1C7799
+
+  &:active, &.avl-btn-active
+    background-color: #186B89
+
+.avl-btn-success
+  background-color: #29A59A
+  font-size: 13px
+
+  &:hover
+    background-color: #28A098
+
+  &:active, &.avl-btn-active
+    background-color: #238C85
+
+.avl-btn-danger
+  background-color: #C84043
+  font-size: 13px
+
+  &:hover
+    background-color: #B0383B
+
+  &:active, &.avl-btn-active
+    background-color: #9D3032
+
+a.avl-link
+  color: $link-color
+
+  &:hover, &:active
+    color: $link-hover-color
+
+table.avl-table
+  width: 100%
+
+  thead
+    tr
+      th
+        background-color: $bg-color-table-head
+        font-size: 12px
+        text-transform: uppercase
+        font-weight: bold
+        text-align: left
+
+  tbody
+    tr:nth-child(odd)
+      td
+        background-color: $bg-color-table-odd
+
+
+    tr:nth-child(even)
+      td
+        background-color: $bg-color-table-even
+
+    tr
+      border-bottom: 1px solid white
+
+      td
+        font-size: 13px
+        text-align: left
+
+  thead, tbody
+    tr
+      td, th
+        padding: 12px 15px
+
+        &.avl-cell-color1, &.avl-cell-color2,
+        &.avl-cell-color3, &.avl-cell-color4,
+        &.avl-cell-color5, &.avl-cell-color6,
+        &.avl-cell-color7, &.avl-cell-color8,
+          color: white
+
+        &.avl-cell-color1
+          background-color: $bg-color1
+
+        &.avl-cell-color2
+          background-color: $bg-color2
+
+        &.avl-cell-color3
+          background-color: $bg-color3
+
+        &.avl-cell-color4
+          background-color: $bg-color4
+
+        &.avl-cell-color5
+          background-color: $bg-color5
+
+        &.avl-cell-color6
+          background-color: $bg-color6
+
+        &.avl-cell-color7
+          background-color: $bg-color7
+
+        &.avl-cell-color8
+          background-color: $bg-color8

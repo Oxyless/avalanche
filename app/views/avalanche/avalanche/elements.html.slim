@@ -1,0 +1,108 @@
+.avl-blocs
+  .avl-tabs
+    .avl-tab.avl-active
+      | Résumé
+    .avl-tab
+      | Planifiés
+    .avl-tab
+      | En queue    
+    .avl-tab
+      | En cours  
+    .avl-tab
+      | Exécutés 
+    .avl-tab
+      | Crons 
+
+  / .avl-error-bloc
+  /   | La Queue #98989898 a été supprimée
+
+  .avl-bloc-half
+    h3.avl-h3
+      | Tableau
+
+    table.avl-table
+      thead
+        tr
+          th
+            | Titre 1
+          th
+            | Titre 2
+          th
+            | Titre 3
+          th
+            | Titre 4
+      tbody
+        - (1..8).each do |n|
+          tr
+            td class="avl-cell-color#{n}"
+              | Valeur 1
+            td
+              | Valeur 2
+            td
+              | Valeur 3
+            td
+              | Valeur 4
+              
+  .avl-bloc-half
+    h3.avl-h3
+      | Tableau
+
+    table.avl-table
+      thead
+        tr
+          th
+            | Titre 1
+          th
+            | Titre 2
+          th
+            | Titre 3
+          th
+            | Titre 4
+      tbody
+        - (1..8).each do |n|
+          tr
+            td class="avl-cell-color#{n}"
+              | Valeur 1
+            td
+              | Valeur 2
+            td
+              | Valeur 3
+            td
+              | Valeur 4
+
+  .avl-bloc
+    h3.avl-h3
+      | Bouton "action neutre"
+
+    div.avl-btn
+      a href="#"
+        | Détails
+
+  .avl-bloc
+    h3.avl-h3
+      | Bouton "action positive"
+      
+    div.avl-btn-success
+      | Enregistrer
+
+  .avl-bloc
+    h3.avl-h3
+      | Bouton "action négative"
+      
+    div.avl-btn-danger
+      a href="#"
+        | Supprimer
+
+  .avl-bloc
+    h3.avl-h3
+      | Lien
+      
+    a.avl-link href="#"
+      | Enregistrer
+      
+  .avl-bloc
+    h3.avl-h3
+      | Formulaire
+    
+    form
+      input.avl-btn-success type="submit"

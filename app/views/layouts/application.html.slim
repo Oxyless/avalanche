@@ -2,8 +2,13 @@ doctype html
 
 html
   head
+    = javascript_include_tag "https://code.jquery.com/jquery-3.2.1.js", integrity: "sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=", crossorigin: "anonymous"
+
+    = stylesheet_link_tag "avalanche"
+    = javascript_include_tag "avalanche"
+  
     title
       | Avalanche
 
-  body
+  body.avl-body
     == yield
