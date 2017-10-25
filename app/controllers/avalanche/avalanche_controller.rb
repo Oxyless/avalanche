@@ -3,9 +3,15 @@ module Avalanche
     def index
     end
 
-    def elements
-      
+    def mockup
+    end
 
+    def test
+      render :json => { :cols => ["dawdadw"] }
+    end
+
+    def elements
+      planified = Avalanche::AvalancheJob.where("avalanche_jobs.perform_at > ?", Time.now)
     end
   end
 end

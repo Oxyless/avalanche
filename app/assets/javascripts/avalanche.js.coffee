@@ -7,5 +7,6 @@ $ ->
 
     unless $(this).data("action") == "sending"
       $(this).data("action", "sending")
-
-    return true
+      return true
+      
+    return false

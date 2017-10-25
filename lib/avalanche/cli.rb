@@ -11,12 +11,7 @@ module Avalanche
       ::Rails.application.eager_load!
 
       ::Rails.application.config.after_initialize do
-        Avalanche::AvalancheJob.run_migration
-
-        Avalanche::AvalancheJob.delete_all
-        1000.times do
-          Avalanche::AvalancheJob.create({ :status => Avalanche::AvalancheJob::STATUS_QUEUED, :queue => :test, :action_name => "JobTest", :action_params => "" })
-        end
+        Avalanche::AvalancheJob.create_table
 
         agent_pool = Avalanche::AgentPool.new()
         agent_pool.start_agents

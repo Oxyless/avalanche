@@ -22,7 +22,7 @@ module Avalanche
     end
 
     def next_job
-      next_job = Avalanche::AvalancheJob.next_job.last
+      next_job = Avalanche::AvalancheJob.next_job
 
       if next_job
         next_job.update_attributes({ :status => Avalanche::AvalancheJob::STATUS_RUNNING, :agent_id => self.agent_id })

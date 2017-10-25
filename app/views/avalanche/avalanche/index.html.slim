@@ -1,316 +1,35 @@
-.avl-blocs
+script#main-menu type="text/x-template"
   .avl-tabs
-    .avl-tab.avl-active
-      | Résumé
-    .avl-tab
-      | Planifiés
-    .avl-tab
-      | En queue    
-    .avl-tab
-      | En cours  
-    .avl-tab
-      | Exécutés 
-    .avl-tab
-      | Crons 
+    template v-for="tab in tabs"
+      .avl-tab :class="{ 'avl-active': (tab == tab-active) }"
+        | {{ tab }}
+  
+#avalanche.avl-blocs
+  main-menu
     
-  .avl-bloc#jobs
-    h3.avl-h3
-      a.avl-link href="#"
-        | Planifiés
-
-    table.avl-table
-      thead
-        tr
-          th
-            | Queue
-          th
-            | ID
-          th
-            | Action
-          th
-            | Paramètres
-          th
-            | Planifié
-          th
-            | Action
-      tbody
-        tr
-          td.avl-cell-color1
-            | Queue soft
-          td
-            a.avl-link href="#"
-              | #423223
-          td
-            | Calcul des mots clés
-          td 
-            | campaign_32, "avis produit"
-          td
-            = I18n.l Time.current + 10.day
-          td
-            a.avl-link href="#"
-              | Supprimer
-                
-        tr
-          td.avl-cell-color2
-            | Queue hard
-          td
-           a.avl-link href="#"
-              | #47
-          td 
-            | Email d'Insatisfaction
-          td 
-            | 324434334
-          td
-            = I18n.l Time.current + 5.day
-          td 
-            a.avl-link href="#"
-              | Supprimer
-
-        tr
-          td.avl-cell-color3
-            | Queue rapport
-          td
-            a.avl-link href="#"
-              | #49
-          td  
-            | Rapport de corinne
-          td 
-            | 432443
-          td 
-            = I18n.l Time.current + 3.day
-          td 
-            a.avl-link href="#"
-              | Supprimer
-
-        tr
-          td.avl-cell-color4
-            | Queue email
-          td
-            a.avl-link href="#"
-              | #50
-          td
-            | Envoi enquête 1
-          td 
-            | 43232423, perform
-          td 
-            = I18n.l Time.current + 2.day
-          td 
-            a.avl-link href="#"
-              | Supprimer
-            
-        tr
-          td.avl-cell-color4
-            | Queue email
-          td
-            a.avl-link href="#"
-              | #52
-          td
-            | Envoi enquête 2
-          td 
-            | 987987, perform
-          td 
-            = I18n.l Time.current + 1.day
-          td 
-            a.avl-link href="#"
-              | Supprimer
-
-  .avl-bloc#queues
-    h3.avl-h3
-      a.avl-link href="#"
-        | En Queue
-
-    table.avl-table
-      thead
-        tr
-          th.avl-cell-color4
-            | Queue email
-            
-          th.avl-cell-color2
-            | Queue hard
-            
-          th.avl-cell-color1
-            | Queue soft
-            
-          th.avl-cell-color3
-            | Queue rapports
-          
-      tbody
-        tr
-          td
-            a.avl-link href="#"
-              | 3345
-          td
-            a.avl-link href="#"
-              | 12
-          td
-            a.avl-link href="#"
-              | 0
-          td  
-            a.avl-link href="#"
-              | 142
-
-  .avl-bloc#workers
-    h3.avl-h3
-      a.avl-link href="#"
-        | En cours d'éxécution
-
-    table.avl-table
-      thead
-        tr
-          th
-            | W1
-          th
-            | W2
-          th 
-            | W3
-          th  
-            | W4
-          th
-            | W5
-          th
-            | W6
-          th 
-            | W7
-          th  
-            | W8
-
-      tbody
-        tr
-          td.td_worker
-            table.avl-table
-              tr
-                td.avl-cell-color1
-                td.avl-cell-color2
-                          
-          td.td_worker
-            table.avl-table
-              tr
-                td.avl-cell-color1
-          td.td_worker
-            table.avl-table
-              tr
-                td.avl-cell-color1
-                td.avl-cell-color2
-                td.avl-cell-color3
-                td.avl-cell-color4
-          td.td_worker  
-            table.avl-table
-              tr
-                td.avl-cell-color4
-          td.td_worker
-            table.avl-table
-              tr
-                td.avl-cell-color3
-          td.td_worker
-            table.avl-table
-              tr
-                td.avl-cell-color3
-                td.avl-cell-color4
-          td.td_worker
-            table.avl-table
-              tr
-                td.avl-cell-color2
-          td.td_worker  
-            table.avl-table
-              tr
-                td.avl-cell-color2
-
-        tr
-          td
-            a.avl-link href="#"
-              | 2 / 4
-          td
-            a.avl-link href="#"
-              | 1 / 4
-          td 
-            a.avl-link href="#"
-              | 0 / 4
-          td  
-            a.avl-link href="#"
-              | 2 / 4
-          td
-            a.avl-link href="#"
-              | 4 / 8
-          td
-            a.avl-link href="#"
-              | 2 / 4
-          td 
-            a.avl-link href="#"
-              | 1 / 4
-          td
-            a.avl-link href="#"
-              | 0 / 4
-
-        tr
-          td
-            | Alive
-          td
-            | Running
-          td 
-            | Paused
-          td  
-            | Alive
-          td
-            | Alive
-          td
-            | Restarted
-          td 
-            | Stopped
-          td
-            | new
-
-  .avl-bloc#status
-    h3.avl-h3
-      a.avl-link href="#"
-        | Exécuté (cette semaine)
-        
-    table.avl-table
-      thead
-        tr
-          th
-            | DONE
-          th
-            | RUNNING
-          th
-            | FAILED
-          th
-            | KILLED   
-          th
-            | TIMEOUT
-          th
-            | DEAD
-          th
-            | TENTATIVES
-
-      tbody
-        tr
-          td.td_consumed
-            a.avl-link href="#"
-              | 123
-          td.td_consumed
-            a.avl-link href="#"
-              | 63
-          td.td_consumed
-            a.avl-link href="#"
-              | 0
-          td.td_consumed
-            a.avl-link href="#"
-              | 2
-          td.td_consumed
-            a.avl-link href="#"
-              | 1230
-          td.td_consumed
-            a.avl-link href="#"
-              | 632
-          td.td_consumed
-            a.avl-link href="#"
-              | 42
-
-  .avl-bloc#status
-    h4
-      | Avalanche version 1.4
-
-sass:
-  #workers
-    .td_worker
-      width: 11%
+  scheduled-jobs
+  
+  queued-jobs
+  
+  running-jobs
+  
+  summary-jobs
+    
+coffee:
+  Vue.component('main-menu', {
+    template: '#main-menu',
+    props: [ 'tab-active' ],
+    
+    data: ()->
+      {
+        tabs: [ "Résumé", "Planifiés", "En queue", "En cours", "Exécutés", "Crons"]
+      }
+  })
+  
+  window.avalanche = new Vue({
+    el: '#avalanche',
+    
+    data: {
+      'tab-active': "Résumé"
+    }
+  })
