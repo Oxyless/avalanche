@@ -10,8 +10,42 @@ module Avalanche
     STATUS_TIMEOUT    = 7
     STATUS_SCHEDULED  = 8
 
+    def self.pretty_status(status)
+      raise "status can't be nil" if status.nil?
+
+      case status.to_i
+      when self::STATUS_QUEUED
+        "queued"
+      when self::STATUS_RUNNING
+        "running"
+      when self::STATUS_DONE
+        "done"
+      when self::STATUS_FAILED
+        "failed"
+      when self::STATUS_DEAD
+        "dead"
+      when self::STATUS_KILLME
+        "killme"
+      when self::STATUS_KILLED
+        "killed"
+      when self::STATUS_TIMEOUT
+        "timeout"
+      when self::STATUS_SCHEDULED
+        "scheduled"
+      else
+        status
+      end
+    end
+
+    def self.queue_color(queue)
+      code = 0
+      queue.each_char { |char| code += char.ord }
+      return ((code % 8) + 1)
+    end
+
     def self.jobs_keys
       [
+        :job_id,
         :agent_id,
         :worker_name,
         :status,

@@ -1,0 +1,49 @@
+script#avl-table type="text/x-template" 
+  table.avl-table
+    thead
+      tr
+        th v-for="column in table.columns" :class="column.class"
+          | {{ column.title }}
+    
+    tbody
+      template v-for="data in table.datas"
+        tr
+          td v-for="column in table.columns" :class="data[column.key].class"
+            | {{ data[column.key].value }}
+ 
+coffee:
+  Vue.component('avl-table', {
+    template: '#avl-table',
+    props: [ 'datasUrl', 'datasSource' ],
+    
+    data: ()-> 
+      {
+        datasTable: { 
+          pagination: {},
+          columns: [],
+          datas: []
+        }
+      }
+    ,
+    computed: {
+      table: ()->
+        if this.datasSource?
+          return (this.datasSource)
+          
+        if this.datasUrl?
+          return (this.datasTable)
+          
+    }
+    ,
+    methods: {
+      getDatas: ()->
+        $.get(this.datasUrl).done((result) =>
+          this.datasTable.columns = result.columns
+          this.datasTable.datas = result.datas        
+        )
+    }
+    ,
+    created: ()->
+      if this.datasUrl?
+        this.getDatas()
+  })

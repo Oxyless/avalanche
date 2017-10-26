@@ -1,35 +1,72 @@
-script#main-menu type="text/x-template"
-  .avl-tabs
-    template v-for="tab in tabs"
-      .avl-tab :class="{ 'avl-active': (tab == tab-active) }"
-        | {{ tab }}
+== render partial: "avl_table"
+
+script#avl-tables type="text/x-template" 
+  div
+    | coucou
+
+#avalanche.avl-blocs 
+  == render partial: "menu"
+
+  avl-tables
+    | ddd
+
+  .avl-bloc
+    h3.avl-h3
+      | All
+
+    avl-table :datas-source="datasSource" 
   
-#avalanche.avl-blocs
-  main-menu
+  .avl-bloc  
+    h3.avl-h3
+      | Planifiés
+
+    avl-table datas-url="/avalanche/scheduled_jobs" 
+
+  .avl-bloc
+    h3.avl-h3
+      | En queue
+      
+    avl-table datas-url="/avalanche/job_total_per_queue" 
     
-  scheduled-jobs
-  
-  queued-jobs
-  
-  running-jobs
-  
-  summary-jobs
+  .avl-bloc
+    h3.avl-h3
+      | En cours
+      
+    avl-table datas-url="/avalanche/job_total_per_worker_name"
     
+  .avl-bloc
+    h3.avl-h3
+      | Status
+    
+    avl-table datas-url="/avalanche/job_total_per_status" 
+
 coffee:
-  Vue.component('main-menu', {
-    template: '#main-menu',
-    props: [ 'tab-active' ],
-    
-    data: ()->
-      {
-        tabs: [ "Résumé", "Planifiés", "En queue", "En cours", "Exécutés", "Crons"]
-      }
+  Vue.component('avl-tables', {
+    template: '#avl-tables',
+    props: [ ],
   })
   
+  Vue.component('avl-tables', {
+    template: '#avl-tables',
+    props: [ ],
+  })
+
   window.avalanche = new Vue({
     el: '#avalanche',
     
     data: {
-      'tab-active': "Résumé"
+      tabActive: "Résumé",
+      datasSource: {}
+    },
+    
+    methods: {
+      getDatas: ()->  
+        $.get("/avalanche/scheduled_jobs").done((result) =>
+          this.datasSource = result
+          this.datasSource.valueChanged
+        )
     }
+    ,  
+    created: ()->
+      this.getDatas()
   })

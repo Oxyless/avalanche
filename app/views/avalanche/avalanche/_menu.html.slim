@@ -1,0 +1,27 @@
+avl-menu :tab-active="tabActive" 
+
+coffee:
+  Vue.component('avl-menu-tab', {
+    template: '<div :class="avlTabClass">{{ tab }}</div>',
+    props: [ 'tab', 'tabActive' ],
+    
+    computed:
+      avlTabClass: ()->
+        return { 
+          'avl-tab': true,
+          'avl-tab-active': this.isActive
+        }
+      
+      isActive: ()->
+        return this.tab == this.tabActive
+  })
+
+  Vue.component('avl-menu', {
+    template: '<div class="avl-tabs"><avl-menu-tab v-for="tab in tabs" :tab="tab" :tab-active="tabActive"></avl-menu-tab></div>',
+    props: [ 'tabActive' ],
+    
+    data: ()->
+      {
+        tabs: [ "Résumé", "Planifiés", "En queue", "En cours", "Exécutés", "Crons"]
+      }
+  })

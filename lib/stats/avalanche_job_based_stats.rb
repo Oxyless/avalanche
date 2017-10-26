@@ -16,6 +16,8 @@ class AvalancheJobBasedStats < BasedStats
       case column
       when :job_total
         request = request.select("COUNT(avalanche_jobs.id)")
+      when :job_id
+        request = request.select("MAX(avalanche_jobs.id)")
       when :agent_id
         request = request.select("MAX(avalanche_jobs.agent_id)")
       when :worker_name
@@ -117,7 +119,8 @@ class AvalancheJobBasedStats < BasedStats
       :action_name,
       :action_params,
       :perform_at,
-      :created_at
+      :created_at,
+      :job_id
     ]
   end
 
