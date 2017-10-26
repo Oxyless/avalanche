@@ -1,72 +1,67 @@
 == render partial: "avl_table"
 
-script#avl-tables type="text/x-template" 
-  div
-    | coucou
+script#content-summary type="text/x-template" 
+  template v-for="table in tables" :table="table"
+    .avl-bloc
+      h3.avl-h3
+        | {{ table.title }}
+        
+      avl-table :datas-source="table.datasSource" 
 
 #avalanche.avl-blocs 
   == render partial: "menu"
-
-  avl-tables
-    | ddd
-
-  .avl-bloc
-    h3.avl-h3
-      | All
-
-    avl-table :datas-source="datasSource" 
   
-  .avl-bloc  
-    h3.avl-h3
-      | Planifiés
-
-    avl-table datas-url="/avalanche/scheduled_jobs" 
-
-  .avl-bloc
-    h3.avl-h3
-      | En queue
-      
-    avl-table datas-url="/avalanche/job_total_per_queue" 
-    
-  .avl-bloc
-    h3.avl-h3
-      | En cours
-      
-    avl-table datas-url="/avalanche/job_total_per_worker_name"
-    
-  .avl-bloc
-    h3.avl-h3
-      | Status
-    
-    avl-table datas-url="/avalanche/job_total_per_status" 
+  content-summary
 
 coffee:
-  Vue.component('avl-tables', {
-    template: '#avl-tables',
+  Vue.component('content-summary', {
+    template: '#content-summary',
     props: [ ],
+    
+    data: ()->
+      return {
+        loadCounter: 0,
+        tables: [
+          { id: "scheduled_jobs", title: "scheduled_jobs", datasUrl: "/avalanche/scheduled_jobs", datasSource: null },
+          { id: "job_total_per_queue", title: "job_total_per_queue", datasUrl: "/avalanche/job_total_per_queue", datasSource: null },
+          { id: "job_total_per_worker_name", title: "job_total_per_worker_name", datasUrl: "/avalanche/job_total_per_worker_name", datasSource: null },
+          { id: "job_total_per_status", title: "job_total_per_status", datasUrl: "/avalanche/job_total_per_status", datasSource: null }
+        ],
+        bufferedTables: {}
+      }
+    ,
+    computed: {
+    } 
+    ,
+    methods: {
+      getDatas: ()->        
+        this.tables.forEach((table) =>
+          $.get(table.datasUrl).done((result) =>
+            this.loadCounter += 1
+            this.bufferedTables[table.id] = result
+
+            if this.loadCounter == this.tables.length
+              this.loadCounter = 0
+              
+              for table in this.tables
+                table.datasSource = this.bufferedTables[table.id]
+              
+              setTimeout(() =>
+                this.getDatas()
+              10000)
+          )
+        )
+        #
+    }
+    ,
+    created: ()->
+      this.getDatas()
   })
   
-  Vue.component('avl-tables', {
-    template: '#avl-tables',
-    props: [ ],
-  })
-
   window.avalanche = new Vue({
     el: '#avalanche',
     
     data: {
-      tabActive: "Résumé",
-      datasSource: {}
-    },
-    
-    methods: {
-      getDatas: ()->  
-        $.get("/avalanche/scheduled_jobs").done((result) =>
-          this.datasSource = result
-          this.datasSource.valueChanged
-        )
+      tabActive: "Résumé"
     }
-    ,  
-    created: ()->
-      this.getDatas()
   })
