@@ -6,11 +6,20 @@ module Avalanche
                   :current_job,
                   :local_id,
                   :killed,
-                  :timed_out
+                  :timed_out,
+                  :profile,
+                  :queues,
+                  :worker_name
 
-    def initialize
+    def initialize(profile)
       self.agent_id = Random.rand(2_147_483_647)
       self.last_pulse = Time.current
+      self.profile = profile
+
+      self.queues = self.profile["queues"]
+      self.worker_name = self.profile["worker_name"]
+
+      ap self.profile
     end
 
     def start
@@ -21,31 +30,21 @@ module Avalanche
       self.last_pulse = Time.current
     end
 
-    def next_job
-      next_job = Avalanche::AvalancheJob.next_job
-
-      if next_job
-        next_job.update_attributes({ :status => Avalanche::AvalancheJob::STATUS_RUNNING, :agent_id => self.agent_id })
-      end
-
-      next_job
-    end
-
     def action_loop
       while 1
-        puts "action_loop #{thread_id}"
-        self.pulse
+        puts "Agent loop: #{self.agent_id}"
 
-        job = self.next_job
+        self.pulse
+        job = Avalanche::Job.pick_job(self)
 
         if job
           begin
             self.current_job = job
-            # next_job.update_attributes({ :status => Avalanche::AvalancheJob::STATUS_KILLME })
-            self.current_job.action_name.constantize.perform
-            self.current_job.update_attributes({ :status => Avalanche::AvalancheJob::STATUS_DONE })
+            # next_job.update_attributes({ :status => Avalanche::Job::STATUS_KILLME })
+            self.current_job.action_name.constantize.perform(*YAML::load(job.action_params))
+            self.current_job.update_attributes({ :status => Avalanche::Job::STATUS_DONE })
           rescue Exception => e
-            self.current_job.update_attributes({ :status => Avalanche::AvalancheJob::STATUS_FAILED, :message => e.message })
+            self.current_job.update_attributes({ :status => Avalanche::Job::STATUS_FAILED, :message => e.message })
           end
         else
           sleep(5)

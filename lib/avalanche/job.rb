@@ -53,8 +53,35 @@ module Avalanche
         :action_name,
         :action_params,
         :perform_at,
-        :created_at
+        :created_at,
+        :message
       ]
+    end
+
+    def self.pick_job(agent)
+      job = nil
+
+      Avalanche::AvalancheJob.transaction do
+        job = Avalanche::AvalancheJob.where("avalanche_jobs.agent_id IS NULL")
+        job = job.where("(avalanche_jobs.perform_at IS NULL OR avalanche_jobs.perform_at < \"#{Time.current.to_s(:db)}\")")
+        job = job.where(:queue => agent.queues) if agent.queues != "*"
+        job = job.first
+
+        if job
+          job.lock!
+          job.update_attributes({ :status => Avalanche::Job::STATUS_RUNNING, :worker_name => agent.worker_name, :agent_id => agent.agent_id })
+        end
+      end
+
+      job
+    end
+
+    def self.all_jobs(limit = 5)
+      a = AvalancheJobBasedStats.new(
+          :segmentations => [ :job_id ],
+          :limit => limit,
+          :order => 'avalanche_jobs.id DESC'
+      ).get_columns(self.jobs_keys).to_a.reverse.to_h
     end
 
     def self.scheduled_jobs(limit = 5)

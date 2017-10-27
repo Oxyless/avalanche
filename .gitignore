@@ -3,4 +3,4 @@
 /test
 /vendor
 /public
-/config
+/config/database.yml

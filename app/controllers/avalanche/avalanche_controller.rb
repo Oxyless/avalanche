@@ -6,6 +6,43 @@ module Avalanche
     def mockup
     end
 
+    def all_jobs
+      all_jobs = Avalanche::Job.all_jobs(10)
+
+      columns = [
+          { title: "Queue", key: "queue" },
+          { title: "Job id", key: "job_id" },
+          { title: "Agent id", key: "agent_id" },
+          { title: "Worker name", key: "worker_name" },
+          { title: "Action Name", key: "action_name" },
+          { title: "Action Params", key: "action_params" },
+          { title: "Created at", key: "created_at" },
+          { title: "Perform at", key: "perform_at" },
+          { title: "Message", key: "message" },
+          { title: "Status", key: "status" }
+      ]
+
+      lines = all_jobs.map do |job_id, job_lines|
+        job_lines.each do |line_key, line_val|
+          _class = "avl-cell-color#{Avalanche::Job.queue_color(line_val)}" if line_key == :queue
+
+          value = line_val
+          value =  Avalanche::Job.pretty_status(value) if line_key == :status
+          value =  YAML::load(value) if line_key == :action_params
+
+          job_lines[line_key] = {
+            value: value,
+            class: _class
+          }
+        end
+      end
+
+      render :json => {
+        columns: columns,
+        lines: lines
+      }
+    end
+
     def scheduled_jobs
       scheduled_jobs = Avalanche::Job.scheduled_jobs
 
@@ -14,19 +51,25 @@ module Avalanche
           { title: "Job id", key: "job_id" },
           { title: "Agent id", key: "agent_id" },
           { title: "Worker name", key: "worker_name" },
-          { title: "Status", key: "status" },
           { title: "Action Name", key: "action_name" },
           { title: "Action Params", key: "action_params" },
           { title: "Created at", key: "created_at" },
-          { title: "Perform at", key: "perform_at" }
+          { title: "Perform at", key: "perform_at" },
+          { title: "Message", key: "message" },
+          { title: "Status", key: "status" }
       ]
 
-      datas = scheduled_jobs.map do |job_id, job_datas|
-        job_datas.each do |datas_key, datas_val|
-          _class = "avl-cell-color#{Avalanche::Job.queue_color(datas_val)}" if datas_key == :queue
+      lines = scheduled_jobs.map do |job_id, job_lines|
+        job_lines.each do |line_key, line_val|
+          _class = "avl-cell-color#{Avalanche::Job.queue_color(line_val)}" if line_key == :queue
 
-          job_datas[datas_key] = {
-            value: datas_val,
+          value = line_val
+          value =  Avalanche::Job.pretty_status(value) if line_key == :status
+          value =  YAML::load(value) if line_key == :action_params
+
+
+          job_lines[line_key] = {
+            value: value,
             class: _class
           }
         end
@@ -34,7 +77,7 @@ module Avalanche
 
       render :json => {
         columns: columns,
-        datas: datas
+        lines: lines
       }
     end
 
@@ -45,17 +88,17 @@ module Avalanche
         { title: queue, key: queue, class:"avl-cell-color#{Avalanche::Job.queue_color(queue)}" }
       end
 
-      datas = []
-      datas[0] = {}
+      lines = []
+      lines[0] = {}
       job_total_per_queue.keys.each do |queue|
-        datas[0]["#{queue}"] = {
+        lines[0]["#{queue}"] = {
           :value => job_total_per_queue[queue][:job_total]
         }
       end
 
       render :json => {
         columns: columns,
-        datas: datas
+        lines: lines
       }
     end
 
@@ -66,17 +109,17 @@ module Avalanche
         { title: worker, key: worker }
       end
 
-      datas = []
-      datas[0] = {}
+      lines = []
+      lines[0] = {}
       job_total_per_worker_name.keys.each do |worker|
-        datas[0]["#{worker}"] = {
+        lines[0]["#{worker}"] = {
           :value => job_total_per_worker_name[worker][:job_total]
         }
       end
 
       render :json => {
         columns: columns,
-        datas: datas
+        lines: lines
       }
     end
 
@@ -87,22 +130,21 @@ module Avalanche
         { title: Avalanche::Job.pretty_status(status), key: status }
       end
 
-      datas = []
-      datas[0] = {}
+      lines = []
+      lines[0] = {}
       job_total_per_status.keys.each do |status|
-        datas[0]["#{status}"] = {
+        lines[0]["#{status}"] = {
           :value => job_total_per_status[status][:job_total]
         }
       end
 
       render :json => {
         columns: columns,
-        datas: datas
+        lines: lines
       }
     end
 
     def elements
-      planified = Avalanche::AvalancheJob.where("avalanche_jobs.perform_at > ?", Time.now)
     end
   end
 end

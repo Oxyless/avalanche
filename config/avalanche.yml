@@ -1,0 +1,13 @@
+avalanche:
+  worker_name: avalanche_1
+
+  pool:
+    p_1:
+      profile:
+        queues: [ soft, medium, hard ]
+      agents: 0
+
+    p_2:
+      profile:
+        queues: "*"
+      agents: 1

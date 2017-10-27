@@ -14,6 +14,8 @@ class AvalancheJobBasedStats < BasedStats
       valid_column = true
 
       case column
+      when :message
+        request = request.select("avalanche_jobs.message")
       when :job_total
         request = request.select("COUNT(avalanche_jobs.id)")
       when :job_id
@@ -49,6 +51,7 @@ class AvalancheJobBasedStats < BasedStats
   def request_filters(date)
     request = Avalanche::AvalancheJob.created_between(date[:date_begin], date[:date_end])
     request = request.limit(@limit) if @limit
+    request = request.order(@order) if @order
 
     if @filters[:action_name].present?
       request = request.where(:action_name => @filters[:action_name])
@@ -120,7 +123,8 @@ class AvalancheJobBasedStats < BasedStats
       :action_params,
       :perform_at,
       :created_at,
-      :job_id
+      :job_id,
+      :message
     ]
   end
 

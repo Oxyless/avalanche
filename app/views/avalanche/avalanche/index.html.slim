@@ -1,18 +1,19 @@
 == render partial: "avl_table"
+== render partial: "menu"
 
 script#content-summary type="text/x-template" 
-  template v-for="table in tables" :table="table"
-    .avl-bloc
+  avl-menu :tab-active="tabActive" :logo="logo"
+
+  template v-for="table in tables" :table="table" :key="table.id"
+    div :class="table.class"
       h3.avl-h3
         | {{ table.title }}
         
-      avl-table :datas-source="table.datasSource" 
+      avl-table :data-source="table.dataSource" 
 
 #avalanche.avl-blocs 
-  == render partial: "menu"
-  
   content-summary
-
+  
 coffee:
   Vue.component('content-summary', {
     template: '#content-summary',
@@ -20,23 +21,35 @@ coffee:
     
     data: ()->
       return {
+        pulsePath: "assets/pulse_static.gif",
+        pulseTime: 1000,
         loadCounter: 0,
+        tabActive: "Résumé",
         tables: [
-          { id: "scheduled_jobs", title: "scheduled_jobs", datasUrl: "/avalanche/scheduled_jobs", datasSource: null },
-          { id: "job_total_per_queue", title: "job_total_per_queue", datasUrl: "/avalanche/job_total_per_queue", datasSource: null },
-          { id: "job_total_per_worker_name", title: "job_total_per_worker_name", datasUrl: "/avalanche/job_total_per_worker_name", datasSource: null },
-          { id: "job_total_per_status", title: "job_total_per_status", datasUrl: "/avalanche/job_total_per_status", datasSource: null }
+          { id: "all_jobs", title: "all_jobs", dataUrl: "/avalanche/all_jobs", dataSource: null, class: "avl-bloc" },
+          # { id: "scheduled_jobs", title: "scheduled_jobs", dataUrl: "/avalanche/scheduled_jobs", dataSource: null, class: "avl-bloc" },
+          { id: "job_total_per_queue", title: "job_total_per_queue", dataUrl: "/avalanche/job_total_per_queue", dataSource: null, class: "avl-bloc-half"  },
+          { id: "job_total_per_worker_name", title: "job_total_per_worker_name", dataUrl: "/avalanche/job_total_per_worker_name", dataSource: null, class: "avl-bloc-half"  },
+          { id: "job_total_per_status", title: "job_total_per_status", dataUrl: "/avalanche/job_total_per_status", dataSource: null, class: "avl-bloc"  }
         ],
         bufferedTables: {}
       }
     ,
     computed: {
+      logo: ()->
+        "<img src='#{this.pulsePath}' style='width: 50px; margin-right: 15px; margin-bottom: -8px' />"
     } 
     ,
     methods: {
-      getDatas: ()->        
+      pulseAnimation: ()->
+        this.pulsePath = "assets/pulse_dyn.gif"    
+        setTimeout(() =>
+          this.pulsePath = "assets/pulse_static.gif"
+        1000)
+    
+      getData: ()->        
         this.tables.forEach((table) =>
-          $.get(table.datasUrl).done((result) =>
+          $.get(table.dataUrl).done((result) =>
             this.loadCounter += 1
             this.bufferedTables[table.id] = result
 
@@ -44,18 +57,18 @@ coffee:
               this.loadCounter = 0
               
               for table in this.tables
-                table.datasSource = this.bufferedTables[table.id]
+                table.dataSource = this.bufferedTables[table.id]        
               
+              this.pulseAnimation()
               setTimeout(() =>
-                this.getDatas()
-              10000)
+                this.getData()
+              this.pulseTime)
           )
         )
-        #
     }
     ,
     created: ()->
-      this.getDatas()
+      this.getData()
   })
   
   window.avalanche = new Vue({

@@ -4,13 +4,20 @@ require_relative "agent"
 
 module Avalanche
   class AgentPool
-    def initialize
+    def initialize(config)
       @thread_manager = Avalanche::ThreadManager.new
       @agents = Avalanche::SafeArray.new
       @mutex = Mutex.new
 
+      @required_agents = []
       @total_agents = 0
-      @max_agents = 3
+
+      config["pool"].each do |p_id, p_config|
+        p_config["agents"].times do
+          p_config["profile"]["worker_name"] = config["worker_name"]
+          self.need_agent(p_config["profile"])
+        end
+      end
     end
 
     def start_agents
@@ -36,11 +43,15 @@ module Avalanche
       @thread_manager.join_all
     end
 
-    def start_agent
-      puts "start_agent"
+    def start_agent(profile)
+      @mutex.synchronize do
+        @total_agents += 1
+      end
 
-      agent = Avalanche::Agent.new
+      agent = Avalanche::Agent.new(profile)
+      agent.profile = profile
 
+      puts "Agent loaded #{agent.agent_id}: #{profile}"
       thread_id = @thread_manager.start_thread do
         agent.start
       end
@@ -48,16 +59,12 @@ module Avalanche
       agent.thread_id = thread_id
       agent.local_id = @agents.push(agent)
 
-      @mutex.synchronize do
-        @total_agents += 1
-      end
-
       agent
     end
 
-    def need_agent
+    def need_agent(profile)
       @mutex.synchronize do
-        @max_agents += 1
+        @required_agents << profile
       end
     end
 
@@ -75,8 +82,8 @@ module Avalanche
 
     def agents_loop
       while 1
-        if @total_agents < @max_agents
-          self.start_agent
+        if @total_agents < @required_agents.size
+          self.start_agent(@required_agents[@total_agents])
         end
 
         sleep(1)
@@ -85,9 +92,9 @@ module Avalanche
 
     def kill_loop
       while 1
-        puts "kill_loop"
+        puts "Kill loop"
 
-        Avalanche::AvalancheJob.where(:status => Avalanche::AvalancheJob::STATUS_KILLME)
+        Avalanche::AvalancheJob.where(:status => Avalanche::Job::STATUS_KILLME)
                   .where(:queue => :test)
                   .where(:"avalanche_jobs.agent_id" => @agents.map(&:agent_id))
                   .each do |dothing_job|
@@ -95,11 +102,11 @@ module Avalanche
           agent_killed = self.kill_agent(dothing_job.agent_id)
 
           if agent_killed
-            dothing_job.update_attribute(:status, Avalanche::AvalancheJob::STATUS_KILLED)
+            dothing_job.update_attribute(:status, Avalanche::Job::STATUS_KILLED)
             agent_killed.killed = true
 
-            puts "#{dothing_job.agent_id} killed"
-            self.need_agent
+            puts "Agent #{dothing_job.agent_id} killed"
+            self.need_agent(agent_killed.profile)
           end
         end
 
@@ -109,7 +116,7 @@ module Avalanche
 
     def timeout_loop
       while 1
-        puts "timeout_loop"
+        puts "Timeout loop"
 
         @agents.each do |agent|
           next if agent.timed_out
@@ -117,16 +124,16 @@ module Avalanche
 
           current_time = Time.current
 
-          if current_time - agent.last_pulse > 30
+          if current_time - agent.last_pulse > 60
             agent_killed = self.kill_agent(agent.agent_id)
 
             if agent_killed
               if agent.current_job
-                agent_killed.current_job.update_attribute(:status, Avalanche::AvalancheJob::STATUS_TIMEOUT)
+                agent_killed.current_job.update_attribute(:status, Avalanche::Job::STATUS_TIMEOUT)
                 agent_killed.timed_out = true
 
-                puts "#{agent.agent_id} timed_out"
-                self.need_agent
+                puts "Agent #{agent.agent_id} timed_out"
+                self.need_agent(agent_killed.profile)
               end
             end
           end

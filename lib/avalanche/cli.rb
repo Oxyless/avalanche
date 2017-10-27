@@ -13,7 +13,17 @@ module Avalanche
       ::Rails.application.config.after_initialize do
         Avalanche::AvalancheJob.create_table
 
-        agent_pool = Avalanche::AgentPool.new()
+        Avalanche::AvalancheJob.create({
+           :queue => "test",
+           :status => Avalanche::Job::STATUS_QUEUED,
+           :action_name => "JobTest",
+           :action_params => YAML::dump([ "hello" ])
+        })
+
+        config = YAML::load_file(File.join(Rails.root, 'config/avalanche.yml'))
+
+
+        agent_pool = Avalanche::AgentPool.new(config["avalanche"])
         agent_pool.start_agents
       end
     end

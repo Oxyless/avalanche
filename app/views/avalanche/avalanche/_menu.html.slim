@@ -1,4 +1,3 @@
-avl-menu :tab-active="tabActive" 
 
 coffee:
   Vue.component('avl-menu-tab', {
@@ -17,8 +16,8 @@ coffee:
   })
 
   Vue.component('avl-menu', {
-    template: '<div class="avl-tabs"><avl-menu-tab v-for="tab in tabs" :tab="tab" :tab-active="tabActive"></avl-menu-tab></div>',
-    props: [ 'tabActive' ],
+    template: '<div class="avl-tabs"><div style="display: inline-block;">{{{ logo }}}</div><avl-menu-tab v-for="tab in tabs" :tab="tab" :tab-active="tabActive"></avl-menu-tab></div>',
+    props: [ 'tabActive', 'logo' ],
     
     data: ()->
       {

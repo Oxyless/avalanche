@@ -6,44 +6,44 @@ script#avl-table type="text/x-template"
           | {{ column.title }}
     
     tbody
-      template v-for="data in table.datas"
+      template v-for="line in table.lines"
         tr
-          td v-for="column in table.columns" :class="data[column.key].class"
-            | {{ data[column.key].value }}
+          td v-for="column in table.columns" :class="line[column.key].class"
+            | {{ line[column.key].value }}
  
 coffee:
   Vue.component('avl-table', {
     template: '#avl-table',
-    props: [ 'datasUrl', 'datasSource' ],
+    props: [ 'dataUrl', 'dataSource' ],
     
     data: ()-> 
       {
-        datasTable: { 
+        dataTable: { 
           pagination: {},
           columns: [],
-          datas: []
+          lines: []
         }
       }
     ,
     computed: {
       table: ()->
-        if this.datasSource?
-          return (this.datasSource)
+        if this.dataSource?
+          return (this.dataSource)
           
-        if this.datasUrl?
-          return (this.datasTable)
+        if this.dataUrl?
+          return (this.dataTable)
           
     }
     ,
     methods: {
-      getDatas: ()->
-        $.get(this.datasUrl).done((result) =>
-          this.datasTable.columns = result.columns
-          this.datasTable.datas = result.datas        
+      getData: ()->
+        $.get(this.dataUrl).done((result) =>
+          this.dataTable.columns = result.columns
+          this.dataTable.lines = result.lines       
         )
     }
     ,
     created: ()->
-      if this.datasUrl?
-        this.getDatas()
+      if this.dataUrl?
+        this.getData()
   })

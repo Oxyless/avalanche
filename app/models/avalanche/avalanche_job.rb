@@ -2,11 +2,22 @@ require "active_record"
 
 module Avalanche
   class AvalancheJob < ActiveRecord::Base
-    attr_accessible :queue, :perform_at, :status, :action_name, :action_params, :agent_id, :message, :worker_name
+    attr_accessible :queue,
+                    :perform_at,
+                    :status,
+                    :action_name,
+                    :action_params,
+                    :agent_id,
+                    :message,
+                    :worker_name
 
     scope :created_between, -> (start_date, end_date) { created_after(start_date).created_before(end_date) }
     scope :created_before, -> (date) { (date ? where("avalanche_jobs.created_at <= ?", date) : scoped) }
     scope :created_after, -> (date) { (date ? where("avalanche_jobs.created_at >= ?", date) : scoped) }
+
+    def kill_me
+      self.update_attribute(:status, Avalanche::Job::STATUS_KILLME)
+    end
 
     def self.create_table
       unless ActiveRecord::Base.connection.tables.include? "avalanche_jobs"
@@ -106,19 +117,6 @@ module Avalanche
       end
 
       Avalanche::AvalancheJob.count
-    end
-
-    def self.next_job
-      AvalancheJob.next_jobs(1)
-    end
-
-    def self.next_jobs(limit = nil)
-      jobs = AvalancheJob.where("avalanche_jobs.agent_id IS NULL")
-                         .where("(avalanche_jobs.perform_at IS NULL OR avalanche_jobs.perform_at < \"#{Time.current.to_s(:db)}\")")
-
-      jobs = jobs.limit(limit) if limit
-
-      return (limit == 1 ? jobs.last : jobs)
     end
   end
 end
