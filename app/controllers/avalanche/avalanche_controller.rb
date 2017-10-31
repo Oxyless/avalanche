@@ -6,8 +6,13 @@ module Avalanche
     def mockup
     end
 
+    def jobs
+
+    end
+
     def all_jobs
-      all_jobs = Avalanche::Job.all_jobs(10)
+      current_page = (params[:page].present? ? params[:page].to_i : 1)
+      all_jobs, total_page = Avalanche::Job.all_jobs(per_page: 30, page: current_page)
 
       columns = [
           { title: "Queue", key: "queue" },
@@ -39,12 +44,13 @@ module Avalanche
 
       render :json => {
         columns: columns,
-        lines: lines
+        lines: lines,
+        pagination: { :currentPage => current_page, :totalPage => total_page }
       }
     end
 
     def running_jobs
-      all_jobs = Avalanche::Job.all_jobs(10, :status => [ Avalanche::Job::STATUS_RUNNING, Avalanche::Job::STATUS_KILLME ])
+      all_jobs, total_page = Avalanche::Job.all_jobs(:status => [ Avalanche::Job::STATUS_RUNNING, Avalanche::Job::STATUS_KILLME ])
 
       columns = [
           { title: "Queue", key: "queue" },

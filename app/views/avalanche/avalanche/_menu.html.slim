@@ -1,7 +1,7 @@
 
 coffee:
   Vue.component('avl-menu-tab', {
-    template: '<div :class="avlTabClass">{{ tab }}</div>',
+    template: '<a :href="tab.url"><div :class="avlTabClass">{{ tab.label }}</div></a>',
     props: [ 'tab', 'tabActive' ],
     
     computed:
@@ -12,7 +12,7 @@ coffee:
         }
       
       isActive: ()->
-        return this.tab == this.tabActive
+        return this.tab.label == this.tabActive
   })
 
   Vue.component('avl-menu', {
@@ -21,6 +21,6 @@ coffee:
     
     data: ()->
       {
-        tabs: [ "Résumé", "Planifiés", "En queue", "En cours", "Exécutés", "Crons"]
+        tabs: [ { label: "Résumé", url: "/" } , { label: "Jobs", url: "/avalanche/jobs" }  ]
       }
   })

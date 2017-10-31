@@ -30,9 +30,17 @@ script#avl-table type="text/x-template"
 
               td v-for="line in table.lines" :class="line[column.key].class"
                 avl-cell :value="line[column.key].value"
+    
+    template v-if="multipage"
+      .avl-pagination
+        input type="number" min="1" :value="currentPage" class="avl-current-page" v-model="currentPage" @change="getData()"
+        
+        span
+          | / {{ dataTable.pagination.totalPage }}
+
   template v-else=""
     div 
-      | Pas de donnée
+      
    
 coffee:
   Vue.component('avl-cell', {
@@ -58,18 +66,23 @@ coffee:
   
   Vue.component('avl-table', {
     template: '#avl-table',
-    props: [ 'dataUrl', 'dataSource', 'orientation' ],
+    props: [ 'dataUrl', 'dataSource', 'orientation', 'multipage', 'currentPage' ],
     
     data: ()-> 
       {
         dataTable: { 
-          pagination: {},
           columns: [],
-          lines: []
+          lines: [],
+          pagination: { totalPage: 1 }
         }
       }
     ,
-    computed: {
+    computed: {        
+      totalPage: ()->
+        if this.multipage
+          return this.dataTable.pagination.totalPage
+
+        return 1
       horizontal: ()->
         return this.orientation != "vertical"
         
@@ -87,9 +100,24 @@ coffee:
     ,
     methods: {
       getData: ()->
-        $.get(this.dataUrl).done((result) =>
+        url = this.dataUrl  
+        
+        if this.multipage
+          unless this.currentPage
+            this.currentPage = 1
+            
+          if this.currentPage < 1
+            this.currentPage = 1
+          if this.currentPage > this.dataTable.pagination.totalPage
+            this.currentPage = this.dataTable.pagination.totalPage
+
+            
+          url = "#{this.dataUrl}?page=#{this.currentPage}" 
+
+        $.get(url).done((result) =>
           this.dataTable.columns = result.columns
           this.dataTable.lines = result.lines       
+          this.dataTable.pagination = result.pagination    
         )
     }
     ,

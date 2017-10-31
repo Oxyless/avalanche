@@ -2,6 +2,9 @@ Avalanche::Application.routes.draw do
   scope module: 'avalanche'  do
     root :to => 'avalanche#index'
 
+    get 'avalanche/jobs' => 'avalanche#jobs'
+
+
     get 'avalanche/elements' => 'avalanche#elements'
     get 'avalanche/mockup' => 'avalanche#mockup'
     get 'avalanche/test' => 'avalanche#test'

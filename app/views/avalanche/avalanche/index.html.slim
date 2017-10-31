@@ -7,11 +7,9 @@ script#content-summary type="text/x-template"
 
   template v-for="table in tables" :table="table" :key="table.id"
     div :class="table.class"
-      h3.avl-h3
-        | {{ table.title }}
-        
       avl-table :data-source="table.dataSource" :orientation="table.orientation"
-
+      
+  
 #avalanche.avl-blocs 
   content-summary
   
@@ -22,8 +20,8 @@ coffee:
     
     data: ()->
       return {
-        pulsePath: "assets/house_static.svg",
-        pulseTime: 3000,
+        pulsePath: "/assets/house_static.svg",
+        pulseTime: 2000,
         loadCounter: 0,
         totalReload: 0,
         tabActive: "Résumé",
@@ -32,7 +30,6 @@ coffee:
           { id: "jobs_to_run", orientation: "vertical", title: "To Run", dataUrl: "/avalanche/jobs_to_run", dataSource: null, class: "avl-bloc-half"  },
           { id: "running_jobs_overview", orientation: "vertical", title: "Running", dataUrl: "/avalanche/running_jobs_overview", dataSource: null, class: "avl-bloc-half"  },
           { id: "runned_jobs", title: "Runned", dataUrl: "/avalanche/runned_jobs", dataSource: null, class: "avl-bloc"  },
-          { id: "all_jobs", title: "All", dataUrl: "/avalanche/all_jobs", dataSource: null, class: "avl-bloc" },
         ],
         bufferedTables: {}
       }
@@ -44,13 +41,13 @@ coffee:
     ,
     methods: {
       pulseAnimation: ()->
-        this.pulsePath = "assets/house_dyn.svg"    
+        this.pulsePath = "/assets/house_dyn.svg"    
         setTimeout(() =>
-          this.pulsePath = "assets/house_static.svg"
+          this.pulsePath = "/assets/house_static.svg"
         500)
     
-      getData: ()->        
-        this.tables.forEach((table) =>
+      getData: ()->
+        this.tables.forEach((table) =>    
           $.get(table.dataUrl).done((result) =>
             this.loadCounter += 1
             this.bufferedTables[table.id] = result

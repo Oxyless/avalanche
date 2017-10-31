@@ -1,0 +1,21 @@
+== render partial: "avl_button"
+== render partial: "avl_table"
+== render partial: "menu"
+
+#avalanche.avl-blocs 
+  avl-menu tab-active="Jobs" :logo="logo"
+  
+  .avl-bloc
+    avl-table data-url="/avalanche/all_jobs" multipage="true"
+  
+coffee:  
+  window.avalanche = new Vue({
+    el: '#avalanche',
+    
+    data: {
+      tabActive: "Résumé",
+      logo: "<img src='/assets/house_static.svg' style='width: 50px; margin-right: 15px; margin-bottom: -19px' />"
+    }
+  })
+
+      

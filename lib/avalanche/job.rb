@@ -126,17 +126,23 @@ module Avalanche
       end
     end
 
-    def self.all_jobs(limit = 5, status: nil)
+    def self.all_jobs(
+      status: nil,
+      per_page: 10,
+      page: 1
+    )
       filters = {}
 
       filters[:status] = status if status
 
-      a = Avalanche::Stats::AvalancheJobBasedStats.new(
+      data, total_page = Avalanche::Stats::AvalancheJobBasedStats.new(
         :filters => filters,
         :segmentations => [ :job_id ],
-        :limit => limit,
-        :order => 'avalanche_jobs.id DESC'
-      ).get_columns(self.jobs_keys).to_a.reverse.to_h
+        :order => 'avalanche_jobs.id DESC',
+        :per_page => per_page
+      ).get_columns_with_pages(self.jobs_keys, page)
+
+      return data.to_a, total_page
     end
 
     def self.scheduled_jobs(limit = 5)
