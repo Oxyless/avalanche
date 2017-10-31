@@ -107,15 +107,14 @@ module Avalanche
         puts "Kill loop"
 
         Avalanche::AvalancheJob.where(:status => Avalanche::Job::STATUS_KILLME)
-                  .where(:"avalanche_jobs.agent_id" => @agents.map(&:agent_id))
+                  .where(:"avalanche_jobs.worker_name" => self.worker_name)
                   .each do |dothing_job|
 
           agent_killed = self.kill_agent(dothing_job.agent_id)
+          dothing_job.update_attribute(:status, Avalanche::Job::STATUS_KILLED)
 
           if agent_killed
-            dothing_job.update_attribute(:status, Avalanche::Job::STATUS_KILLED)
             agent_killed.killed = true
-
             puts "Agent #{dothing_job.agent_id} killed"
             self.need_agent(agent_killed.profile)
           end
@@ -156,9 +155,9 @@ module Avalanche
 
     def hello_loop
       loop do
-        sleep(5)
         puts "Hello loop"
         Avalanche::Job.hello_job(self)
+        sleep(5)
       end
     end
   end

@@ -1,0 +1,44 @@
+script#avl-button type="text/x-template" 
+  div :class="buttonClass" @click="buttonClicked"
+    | {{ buttonLabel }}
+
+coffee:
+  Vue.component('avl-button', {
+    template: '#avl-button',
+    props: [ "target", "type", "label" ],
+    
+    data: ()->
+      {
+        active: this.active
+      }
+    ,
+    methods: {
+      buttonClicked: ()->
+        unless this.active
+          $.post(this.target).done(()->
+            this.active = false
+          )
+        this.active = true
+    } 
+    ,
+    computed:
+      buttonLabel: ()->
+        if this.active
+          return "..."
+        return this.label
+        
+      buttonClass: ()->
+        _class = []
+        
+        if this.type == "danger"
+          _class.push("avl-btn-danger")
+        else if this.type == "success"
+          _class.push("avl-btn-success")
+        else
+          _class.push("avl-btn")
+        
+        if this.active
+          _class.push("avl-btn-active")
+        
+        return _class
+  })

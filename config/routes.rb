@@ -10,6 +10,9 @@ Avalanche::Application.routes.draw do
     get 'avalanche/running_jobs_overview' => 'avalanche#running_jobs_overview'
     get 'avalanche/runned_jobs' => 'avalanche#runned_jobs'
     get 'avalanche/all_jobs' => 'avalanche#all_jobs'
+    post 'avalanche/job/kill/:job_id' => 'avalanche#kill_job'
+
+
   end
 
   # The priority is based upon order of creation:

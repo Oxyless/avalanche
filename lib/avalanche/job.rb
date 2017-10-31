@@ -117,8 +117,22 @@ module Avalanche
       job
     end
 
-    def self.all_jobs(limit = 5)
+    def self.set_job_status(job_id, status)
+      job = Avalanche::AvalancheJob.find_by_id(job_id)
+
+      if job
+        job.status = status
+        job.save
+      end
+    end
+
+    def self.all_jobs(limit = 5, status: nil)
+      filters = {}
+
+      filters[:status] = status if status
+
       a = Avalanche::Stats::AvalancheJobBasedStats.new(
+        :filters => filters,
         :segmentations => [ :job_id ],
         :limit => limit,
         :order => 'avalanche_jobs.id DESC'

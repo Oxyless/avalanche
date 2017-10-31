@@ -1,3 +1,4 @@
+== render partial: "avl_button"
 == render partial: "avl_table"
 == render partial: "menu"
 
@@ -22,16 +23,16 @@ coffee:
     data: ()->
       return {
         pulsePath: "assets/house_static.svg",
-        pulseTime: 2000,
+        pulseTime: 3000,
         loadCounter: 0,
         totalReload: 0,
         tabActive: "Résumé",
         tables: [
-          { id: "all_jobs", title: "All", dataUrl: "/avalanche/all_jobs", dataSource: null, class: "avl-bloc" },
           { id: "running_jobs", title: "Running", dataUrl: "/avalanche/running_jobs", dataSource: null, class: "avl-bloc" },
           { id: "jobs_to_run", orientation: "vertical", title: "To Run", dataUrl: "/avalanche/jobs_to_run", dataSource: null, class: "avl-bloc-half"  },
           { id: "running_jobs_overview", orientation: "vertical", title: "Running", dataUrl: "/avalanche/running_jobs_overview", dataSource: null, class: "avl-bloc-half"  },
-          { id: "runned_jobs", title: "Runned", dataUrl: "/avalanche/runned_jobs", dataSource: null, class: "avl-bloc"  }
+          { id: "runned_jobs", title: "Runned", dataUrl: "/avalanche/runned_jobs", dataSource: null, class: "avl-bloc"  },
+          { id: "all_jobs", title: "All", dataUrl: "/avalanche/all_jobs", dataSource: null, class: "avl-bloc" },
         ],
         bufferedTables: {}
       }
@@ -61,7 +62,7 @@ coffee:
               for table in this.tables
                 table.dataSource = this.bufferedTables[table.id]        
               this.pulseAnimation()
-              
+                            
               setTimeout(() =>
                 this.getData()
               this.pulseTime)
@@ -80,3 +81,5 @@ coffee:
       tabActive: "Résumé"
     }
   })
+
+      

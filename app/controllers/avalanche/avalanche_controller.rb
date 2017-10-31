@@ -28,7 +28,7 @@ module Avalanche
 
           value = line_val
           value =  Avalanche::Job.pretty_status(value) if line_key == :status
-          value =  YAML::load(value) if line_key == :action_params
+          value =  YAML::load(value).join(", ") if line_key == :action_params
 
           job_lines[line_key] = {
             value: value,
@@ -44,7 +44,7 @@ module Avalanche
     end
 
     def running_jobs
-      all_jobs = Avalanche::Job.all_jobs(10)
+      all_jobs = Avalanche::Job.all_jobs(10, :status => [ Avalanche::Job::STATUS_RUNNING, Avalanche::Job::STATUS_KILLME ])
 
       columns = [
           { title: "Queue", key: "queue" },
@@ -55,29 +55,63 @@ module Avalanche
           { title: "Action Params", key: "action_params" },
           { title: "Created at", key: "created_at" },
           { title: "Perform at", key: "perform_at" },
-          { title: "Error", key: "error_message" },
-          { title: "Status", key: "status" }
+          # { title: "Error", key: "error_message" },
+          { title: "Status", key: "status" },
+          { title: "Action", key: "action" }
       ]
 
       lines = all_jobs.map do |job_id, job_lines|
+        job_status = nil
+        job_id = nil
+
         job_lines.each do |line_key, line_val|
           _class = "avl-cell-color#{Avalanche::Job.queue_color(line_val)}" if line_key == :queue
 
           value = line_val
-          value =  Avalanche::Job.pretty_status(value) if line_key == :status
-          value =  YAML::load(value) if line_key == :action_params
+
+          if line_key == :status
+            job_status = value
+            value = Avalanche::Job.pretty_status(value)
+          elsif line_key == :action_params
+            value =  YAML::load(value).join(", ") if line_key == :action_params
+          elsif line_key == :job_id
+            job_id = value
+          end
 
           job_lines[line_key] = {
             value: value,
             class: _class
           }
         end
+
+        actions = []
+        if job_status == Avalanche::Job::STATUS_RUNNING
+          action = {
+            target: "/avalanche/job/kill/#{job_id}",
+            type: "danger",
+            label: "Tuer"
+          }
+
+          actions << action
+        end
+
+        job_lines["action"] = {
+          value: actions,
+        }
+
+        job_lines
       end
 
       render :json => {
         columns: columns,
         lines: lines
       }
+    end
+
+    def kill_job
+      Avalanche::Job.set_job_status(params[:job_id], Avalanche::Job::STATUS_KILLME)
+
+      render :json => { :status => :ok }
     end
 
     def jobs_to_run
@@ -118,12 +152,14 @@ module Avalanche
         line = {}
         running_agents.each do |worker_name, worker_infos|
           html_queues = "<table style=\"width: 100%\"><tbody><tr>"
-          if worker_infos[profile][:queues].present?
-            worker_infos[profile][:queues].each do |queue|
-              html_queues << "<td class=\"avl-cell-color#{Avalanche::Job.queue_color(queue)}\"></td>"
+          if worker_infos[profile]
+            if worker_infos[profile][:queues].present?
+              worker_infos[profile][:queues].each do |queue|
+                html_queues << "<td class=\"avl-cell-color#{Avalanche::Job.queue_color(queue)}\"></td>"
+              end
+            else
+              html_queues << "<td class=\"avl-cell-color-grey\"></td>"
             end
-          else
-            html_queues << "<td class=\"avl-cell-color-grey\"></td>"
           end
           html_queues << "</tr></tbody></table>"
 
@@ -135,7 +171,9 @@ module Avalanche
 
         line = {}
         running_agents.each do |worker_name, worker_infos|
-          line[worker_name] = { :value => "#{worker_infos[profile][:nb_running_job]} / #{worker_infos[profile][:nb_agent]}" }
+          if worker_infos[profile]
+            line[worker_name] = { :value => "#{worker_infos[profile][:nb_running_job]} / #{worker_infos[profile][:nb_agent]}" }
+          end
         end
         lines << line
       end

@@ -1,29 +1,61 @@
-script#avl-table type="text/x-template" 
-  template v-if="horizontal"
-    table.avl-table
-      thead
-        tr
-          th v-for="column in table.columns" :class="column.class"
-            | {{ column.title }}
-      
-      tbody
-        template v-for="line in table.lines"
-          tr
-            td v-for="column in table.columns" :class="line[column.key].class"
-              | {{{ line[column.key].value }}}
-
-  template v-if="vertical"
-    table.avl-table  
-      tbody
-        template v-for="column in table.columns"
-          tr
-            td.avl-th :class="column.class"
-              | {{ column.title }}
-            td v-for="line in table.lines" :class="line[column.key].class"
-              | {{{ line[column.key].value }}}
+script#avl-cell type="text/x-template" 
+  | {{{ stringContent }}}
+  | {{{ numberContent }}}
     
+  template v-for="content in arrayContent"
+    avl-button :target="content.target" :type="content.type" :label="content.label"
+    
+script#avl-table type="text/x-template"
+  template v-if="table.lines.length > 0"
+    template v-if="horizontal"
+      table.avl-table
+        thead
+          tr
+            th v-for="column in table.columns" :class="column.class"
+              avl-cell :value="column.title"
+        
+        tbody
+          template v-for="line in table.lines"
+            tr
+              td v-for="column in table.columns" :class="line[column.key].class"
+                avl-cell :value="line[column.key].value"
+
+    template v-if="vertical"
+      table.avl-table  
+        tbody
+          template v-for="column in table.columns"
+            tr
+              td.avl-th :class="column.class"
+                avl-cell :value="column.title"
+
+              td v-for="line in table.lines" :class="line[column.key].class"
+                avl-cell :value="line[column.key].value"
+  template v-else=""
+    div 
+      | Pas de donnée
    
 coffee:
+  Vue.component('avl-cell', {
+    template: '#avl-cell',
+    props: [ "value" ],
+    
+    computed:
+      numberContent: ()->
+        if typeof this.value is 'number'
+          return this.value
+        return ""
+        
+      stringContent: ()->
+        if typeof this.value is 'string'
+          return this.value
+        return ""
+        
+      arrayContent: ()->
+        if typeof this.value is 'object'
+          return this.value
+        return []
+  })
+  
   Vue.component('avl-table', {
     template: '#avl-table',
     props: [ 'dataUrl', 'dataSource', 'orientation' ],
