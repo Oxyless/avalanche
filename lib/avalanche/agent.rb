@@ -9,15 +9,24 @@ module Avalanche
                   :timed_out,
                   :profile,
                   :queues,
-                  :worker_name
+                  :worker_name,
+                  :profile_name
 
     def initialize(profile)
       self.agent_id = Random.rand(2_147_483_647)
       self.last_pulse = Time.current
       self.profile = profile
-
-      self.queues = self.profile["queues"]
       self.worker_name = self.profile["worker_name"]
+      self.profile_name = self.profile["profile_name"]
+
+      case self.profile["queues"]
+      when Array
+        self.queues = self.profile["queues"]
+      else
+        if self.profile["queues"] != "*"
+          self.queues = [ self.profile["queues"] ]
+        end
+      end
 
       ap self.profile
     end
@@ -28,6 +37,16 @@ module Avalanche
 
     def pulse
       self.last_pulse = Time.current
+    end
+
+    def infos
+      {
+        :agent_id => self.agent_id,
+        :queues => self.queues,
+        :current_job_id => self&.current_job&.id,
+        :last_pulse => self.last_pulse,
+        :profile_name => self.profile_name
+      }
     end
 
     def action_loop
@@ -43,8 +62,10 @@ module Avalanche
             # next_job.update_attributes({ :status => Avalanche::Job::STATUS_KILLME })
             self.current_job.action_name.constantize.perform(*YAML::load(job.action_params))
             self.current_job.update_attributes({ :status => Avalanche::Job::STATUS_DONE })
+            self.current_job = nil
           rescue Exception => e
-            self.current_job.update_attributes({ :status => Avalanche::Job::STATUS_FAILED, :message => e.message })
+            self.current_job.update_attributes({ :status => Avalanche::Job::STATUS_FAILED, :error_message => e.message })
+            self.current_job = nil
           end
         else
           sleep(5)

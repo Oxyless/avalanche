@@ -9,7 +9,7 @@ script#content-summary type="text/x-template"
       h3.avl-h3
         | {{ table.title }}
         
-      avl-table :data-source="table.dataSource" 
+      avl-table :data-source="table.dataSource" :orientation="table.orientation"
 
 #avalanche.avl-blocs 
   content-summary
@@ -21,31 +21,32 @@ coffee:
     
     data: ()->
       return {
-        pulsePath: "assets/pulse_static.gif",
-        pulseTime: 1000,
+        pulsePath: "assets/house_static.svg",
+        pulseTime: 2000,
         loadCounter: 0,
+        totalReload: 0,
         tabActive: "Résumé",
         tables: [
-          { id: "all_jobs", title: "all_jobs", dataUrl: "/avalanche/all_jobs", dataSource: null, class: "avl-bloc" },
-          # { id: "scheduled_jobs", title: "scheduled_jobs", dataUrl: "/avalanche/scheduled_jobs", dataSource: null, class: "avl-bloc" },
-          { id: "job_total_per_queue", title: "job_total_per_queue", dataUrl: "/avalanche/job_total_per_queue", dataSource: null, class: "avl-bloc-half"  },
-          { id: "job_total_per_worker_name", title: "job_total_per_worker_name", dataUrl: "/avalanche/job_total_per_worker_name", dataSource: null, class: "avl-bloc-half"  },
-          { id: "job_total_per_status", title: "job_total_per_status", dataUrl: "/avalanche/job_total_per_status", dataSource: null, class: "avl-bloc"  }
+          { id: "all_jobs", title: "All", dataUrl: "/avalanche/all_jobs", dataSource: null, class: "avl-bloc" },
+          { id: "running_jobs", title: "Running", dataUrl: "/avalanche/running_jobs", dataSource: null, class: "avl-bloc" },
+          { id: "jobs_to_run", orientation: "vertical", title: "To Run", dataUrl: "/avalanche/jobs_to_run", dataSource: null, class: "avl-bloc-half"  },
+          { id: "running_jobs_overview", orientation: "vertical", title: "Running", dataUrl: "/avalanche/running_jobs_overview", dataSource: null, class: "avl-bloc-half"  },
+          { id: "runned_jobs", title: "Runned", dataUrl: "/avalanche/runned_jobs", dataSource: null, class: "avl-bloc"  }
         ],
         bufferedTables: {}
       }
     ,
     computed: {
       logo: ()->
-        "<img src='#{this.pulsePath}' style='width: 50px; margin-right: 15px; margin-bottom: -8px' />"
+        "<img src='#{this.pulsePath}' style='width: 50px; margin-right: 15px; margin-bottom: -19px' />"
     } 
     ,
     methods: {
       pulseAnimation: ()->
-        this.pulsePath = "assets/pulse_dyn.gif"    
+        this.pulsePath = "assets/house_dyn.svg"    
         setTimeout(() =>
-          this.pulsePath = "assets/pulse_static.gif"
-        1000)
+          this.pulsePath = "assets/house_static.svg"
+        500)
     
       getData: ()->        
         this.tables.forEach((table) =>
@@ -55,11 +56,12 @@ coffee:
 
             if this.loadCounter == this.tables.length
               this.loadCounter = 0
+              this.totalReload += 1
               
               for table in this.tables
                 table.dataSource = this.bufferedTables[table.id]        
-              
               this.pulseAnimation()
+              
               setTimeout(() =>
                 this.getData()
               this.pulseTime)

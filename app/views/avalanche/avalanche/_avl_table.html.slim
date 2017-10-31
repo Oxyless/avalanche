@@ -1,20 +1,32 @@
 script#avl-table type="text/x-template" 
-  table.avl-table
-    thead
-      tr
-        th v-for="column in table.columns" :class="column.class"
-          | {{ column.title }}
-    
-    tbody
-      template v-for="line in table.lines"
+  template v-if="horizontal"
+    table.avl-table
+      thead
         tr
-          td v-for="column in table.columns" :class="line[column.key].class"
-            | {{ line[column.key].value }}
- 
+          th v-for="column in table.columns" :class="column.class"
+            | {{ column.title }}
+      
+      tbody
+        template v-for="line in table.lines"
+          tr
+            td v-for="column in table.columns" :class="line[column.key].class"
+              | {{{ line[column.key].value }}}
+
+  template v-if="vertical"
+    table.avl-table  
+      tbody
+        template v-for="column in table.columns"
+          tr
+            td.avl-th :class="column.class"
+              | {{ column.title }}
+            td v-for="line in table.lines" :class="line[column.key].class"
+              | {{{ line[column.key].value }}}
+    
+   
 coffee:
   Vue.component('avl-table', {
     template: '#avl-table',
-    props: [ 'dataUrl', 'dataSource' ],
+    props: [ 'dataUrl', 'dataSource', 'orientation' ],
     
     data: ()-> 
       {
@@ -26,6 +38,12 @@ coffee:
       }
     ,
     computed: {
+      horizontal: ()->
+        return this.orientation != "vertical"
+        
+      vertical: ()->
+        return this.orientation == "vertical"
+      
       table: ()->
         if this.dataSource?
           return (this.dataSource)

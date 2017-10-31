@@ -4,10 +4,15 @@ avalanche:
   pool:
     p_1:
       profile:
-        queues: [ soft, medium, hard ]
-      agents: 0
+        queues: [ medium, hard ]
+      agents: 1
 
     p_2:
       profile:
-        queues: "*"
+        queues: soft
       agents: 1
+
+    p_3:
+      profile:
+        queues: "*"
+      agents: 3

@@ -6,6 +6,7 @@ $bg-color-table-head: #DDDDDD
 $bg-color-table-even: #F7F7F7
 $bg-color-table-odd: #FFFFFF
 
+$bg-color-grey: darkgrey
 $bg-color1: #2DB3AB
 $bg-color2: #BC276D
 $bg-color3: #5656BF
@@ -14,6 +15,7 @@ $bg-color5: #166989
 $bg-color6: #7F2663
 $bg-color7: #1E8DD3
 $bg-color8: #ED6A5A
+
 
 $link-color: #0D6ECD
 $link-hover-color: #000000
@@ -181,15 +183,6 @@ a.avl-link
 table.avl-table
   width: 100%
 
-  thead
-    tr
-      th
-        background-color: $bg-color-table-head
-        font-size: 12px
-        text-transform: uppercase
-        font-weight: bold
-        text-align: left
-
   tbody
     tr:nth-child(odd)
       td
@@ -211,12 +204,16 @@ table.avl-table
     tr
       td, th
         padding: 12px 15px
+        vertical-align: middle
 
         &.avl-cell-color1, &.avl-cell-color2,
         &.avl-cell-color3, &.avl-cell-color4,
         &.avl-cell-color5, &.avl-cell-color6,
         &.avl-cell-color7, &.avl-cell-color8,
           color: white
+
+        &.avl-cell-color-grey
+          background-color: $bg-color-grey
 
         &.avl-cell-color1
           background-color: $bg-color1
@@ -241,3 +238,13 @@ table.avl-table
 
         &.avl-cell-color8
           background-color: $bg-color8
+
+      th
+        background-color: $bg-color-table-head
+        font-size: 12px
+        text-transform: uppercase
+        font-weight: bold
+        text-align: left
+
+      td.avl-th
+        text-transform: uppercase

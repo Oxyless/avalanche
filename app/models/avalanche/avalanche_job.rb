@@ -8,12 +8,17 @@ module Avalanche
                     :action_name,
                     :action_params,
                     :agent_id,
-                    :message,
+                    :error_message,
+                    :log,
                     :worker_name
 
     scope :created_between, -> (start_date, end_date) { created_after(start_date).created_before(end_date) }
     scope :created_before, -> (date) { (date ? where("avalanche_jobs.created_at <= ?", date) : scoped) }
     scope :created_after, -> (date) { (date ? where("avalanche_jobs.created_at >= ?", date) : scoped) }
+
+    scope :perform_at_between, -> (start_date, end_date) { perform_at_after(start_date).perform_at_before(end_date) }
+    scope :perform_at_before, -> (date) { (date ? where("avalanche_jobs.perform_at <= ?", date) : scoped) }
+    scope :perform_at_after, -> (date) { (date ? where("avalanche_jobs.perform_at >= ?", date) : scoped) }
 
     def kill_me
       self.update_attribute(:status, Avalanche::Job::STATUS_KILLME)
@@ -28,7 +33,8 @@ module Avalanche
           t.text     :action_params
           t.string   :worker_name
           t.integer  :agent_id
-          t.text     :message
+          t.text     :error_message
+          t.text     :log
 
           t.datetime :perform_at
 

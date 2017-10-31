@@ -5,10 +5,10 @@ Avalanche::Application.routes.draw do
     get 'avalanche/elements' => 'avalanche#elements'
     get 'avalanche/mockup' => 'avalanche#mockup'
     get 'avalanche/test' => 'avalanche#test'
-    get 'avalanche/scheduled_jobs' => 'avalanche#scheduled_jobs'
-    get 'avalanche/job_total_per_queue' => 'avalanche#job_total_per_queue'
-    get 'avalanche/job_total_per_worker_name' => 'avalanche#job_total_per_worker_name'
-    get 'avalanche/job_total_per_status' => 'avalanche#job_total_per_status'
+    get 'avalanche/jobs_to_run' => 'avalanche#jobs_to_run'
+    get 'avalanche/running_jobs' => 'avalanche#running_jobs'
+    get 'avalanche/running_jobs_overview' => 'avalanche#running_jobs_overview'
+    get 'avalanche/runned_jobs' => 'avalanche#runned_jobs'
     get 'avalanche/all_jobs' => 'avalanche#all_jobs'
   end
 

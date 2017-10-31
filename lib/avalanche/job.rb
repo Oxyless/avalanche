@@ -8,7 +8,8 @@ module Avalanche
     STATUS_KILLME     = 5
     STATUS_KILLED     = 6
     STATUS_TIMEOUT    = 7
-    STATUS_SCHEDULED  = 8
+
+    HELLO_JOB  = "HelloJob"
 
     def self.pretty_status(status)
       raise "status can't be nil" if status.nil?
@@ -30,8 +31,6 @@ module Avalanche
         "killed"
       when self::STATUS_TIMEOUT
         "timeout"
-      when self::STATUS_SCHEDULED
-        "scheduled"
       else
         status
       end
@@ -54,8 +53,49 @@ module Avalanche
         :action_params,
         :perform_at,
         :created_at,
-        :message
+        :error_message
       ]
+    end
+
+    def self.hello_job(agent_pool)
+      worker_name = agent_pool.worker_name
+
+      job = Avalanche::AvalancheJob.where(
+        :worker_name => worker_name
+      ).where(
+        :action_name => self::HELLO_JOB
+      ).find_by_worker_name(
+        worker_name
+      ) || Avalanche::AvalancheJob.new
+
+      job.worker_name = worker_name
+      job.action_name = self::HELLO_JOB
+      job.action_params = YAML::dump([ agent_pool.worker_name ])
+      job.perform_at = Time.zone.now
+      job.status = self::STATUS_DONE
+      job.queue = :hello
+
+      agents = []
+      agent_pool.agents.each do |agent|
+        unless agent.killed || agent.timed_out
+          agents << agent.infos
+        end
+      end
+
+      job.log = YAML::dump({ :agents => agents })
+      job.save
+    end
+
+    def self.remove_deprecated_running_jobs(worker_name)
+      Avalanche::AvalancheJob.where(
+        "avalanche_jobs.status = #{self::STATUS_RUNNING}"
+      ).where(
+        "avalanche_jobs.worker_name = '#{worker_name}'"
+      ).update_all(
+        "avalanche_jobs.status = #{self::STATUS_QUEUED}, \
+        avalanche_jobs.agent_id = NULL, \
+        avalanche_jobs.worker_name = NULL"
+      )
     end
 
     def self.pick_job(agent)
@@ -63,8 +103,9 @@ module Avalanche
 
       Avalanche::AvalancheJob.transaction do
         job = Avalanche::AvalancheJob.where("avalanche_jobs.agent_id IS NULL")
-        job = job.where("(avalanche_jobs.perform_at IS NULL OR avalanche_jobs.perform_at < \"#{Time.current.to_s(:db)}\")")
-        job = job.where(:queue => agent.queues) if agent.queues != "*"
+        job = job.where(:status => [ self::STATUS_QUEUED ])
+        job = job.perform_at_before(Time.zone.now)
+        job = job.where(:queue => agent.queues) if agent.queues
         job = job.first
 
         if job
@@ -77,37 +118,94 @@ module Avalanche
     end
 
     def self.all_jobs(limit = 5)
-      a = AvalancheJobBasedStats.new(
-          :segmentations => [ :job_id ],
-          :limit => limit,
-          :order => 'avalanche_jobs.id DESC'
+      a = Avalanche::Stats::AvalancheJobBasedStats.new(
+        :segmentations => [ :job_id ],
+        :limit => limit,
+        :order => 'avalanche_jobs.id DESC'
       ).get_columns(self.jobs_keys).to_a.reverse.to_h
     end
 
     def self.scheduled_jobs(limit = 5)
-      AvalancheJobBasedStats.new(
-          :filters => { :status => self::STATUS_SCHEDULED },
-          :segmentations => [ :job_id ],
-          :limit => limit
+      Avalanche::Stats::AvalancheJobBasedStats.new(
+        :filters => { :status => self::STATUS_QUEUED },
+        :segmentations => [ :job_id ],
+        :limit => limit
       ).get_columns(self.jobs_keys)
     end
 
     def self.job_total_per_queue
-      AvalancheJobBasedStats.new(
-          :filters => { :status => self::STATUS_QUEUED },
-          :segmentations => [ :queue ]
+      queued_jobs = Avalanche::Stats::AvalancheJobBasedStats.new(
+        :filters => { :status => [ self::STATUS_QUEUED ], :perform_at_before => Time.zone.now },
+        :segmentations => [ :queue ]
       ).get_columns([:job_total])
+
+      queues = []
+      log_per_worker_name = self.log_per_worker_name
+      log_per_worker_name.each do |worker_name, worker_infos|
+        log = YAML::load(worker_infos[:log])
+        agents = log[:agents]
+
+        agents.each do |agent|
+          if agent[:queues] && agent[:queues] != "*"
+            queues += agent[:queues]
+          end
+        end
+      end
+
+      queues.uniq.each do |queue|
+        queued_jobs[queue] ||= { :job_total => 0 }
+      end
+
+      queued_jobs
     end
 
-    def self.job_total_per_worker_name
-      AvalancheJobBasedStats.new(
-          :filters => { :status => self::STATUS_RUNNING },
-          :segmentations => [ :worker_name ]
-      ).get_columns([:job_total])
+    def self.log_per_worker_name
+      worker_logs = Avalanche::Stats::AvalancheJobBasedStats.new(
+        :filters => { :perform_at_after => Time.now - 6.seconds, :action_name => [ self::HELLO_JOB ] },
+        :segmentations => [ :worker_name ]
+      ).get_columns([ :log ])
+    end
+
+    def self.running_agents
+      running_jobs = Avalanche::Stats::AvalancheJobBasedStats.new(
+        :filters => { :status => [  self::STATUS_RUNNING ]},
+        :segmentations => [ :agent_id ]
+      ).get_columns([ :agent_id ])
+
+      worker_logs = self.log_per_worker_name
+
+      agent_profile_infos = { }
+
+      worker_logs.each do |worker_name, worker_infos|
+        log = YAML::load(worker_infos[:log])
+        agent_profile_infos[worker_name] ||= {}
+
+        log[:agents].each do |agent|
+          profile_name = agent[:profile_name]
+
+          agent_profile_infos[worker_name][profile_name] ||= {
+            :nb_agent => 0,
+            :nb_running_job => 0,
+            :queues => []
+          }
+
+          if agent[:queues]
+            agent_profile_infos[worker_name][profile_name][:queues] |= agent[:queues]
+          end
+
+          agent_profile_infos[worker_name][profile_name][:nb_agent] += 1
+          if running_jobs.keys.include?(agent[:agent_id])
+            agent_profile_infos[worker_name][profile_name][:nb_running_job] += 1
+          end
+        end
+      end
+
+      agent_profile_infos
     end
 
     def self.job_total_per_status
-      AvalancheJobBasedStats.new(
+      Avalanche::Stats::AvalancheJobBasedStats.new(
+        :filters => { :status => [  self::STATUS_DONE, self::STATUS_FAILED, self::STATUS_DEAD, self::STATUS_KILLME, self::STATUS_KILLED, self::STATUS_TIMEOUT ]},
         :segmentations => [ :status ],
         :limit => 5
       ).get_columns([:job_total])

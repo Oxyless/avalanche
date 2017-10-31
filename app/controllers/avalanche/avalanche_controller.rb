@@ -18,7 +18,7 @@ module Avalanche
           { title: "Action Params", key: "action_params" },
           { title: "Created at", key: "created_at" },
           { title: "Perform at", key: "perform_at" },
-          { title: "Message", key: "message" },
+          { title: "Error", key: "error_message" },
           { title: "Status", key: "status" }
       ]
 
@@ -43,8 +43,8 @@ module Avalanche
       }
     end
 
-    def scheduled_jobs
-      scheduled_jobs = Avalanche::Job.scheduled_jobs
+    def running_jobs
+      all_jobs = Avalanche::Job.all_jobs(10)
 
       columns = [
           { title: "Queue", key: "queue" },
@@ -55,18 +55,17 @@ module Avalanche
           { title: "Action Params", key: "action_params" },
           { title: "Created at", key: "created_at" },
           { title: "Perform at", key: "perform_at" },
-          { title: "Message", key: "message" },
+          { title: "Error", key: "error_message" },
           { title: "Status", key: "status" }
       ]
 
-      lines = scheduled_jobs.map do |job_id, job_lines|
+      lines = all_jobs.map do |job_id, job_lines|
         job_lines.each do |line_key, line_val|
           _class = "avl-cell-color#{Avalanche::Job.queue_color(line_val)}" if line_key == :queue
 
           value = line_val
           value =  Avalanche::Job.pretty_status(value) if line_key == :status
           value =  YAML::load(value) if line_key == :action_params
-
 
           job_lines[line_key] = {
             value: value,
@@ -81,7 +80,7 @@ module Avalanche
       }
     end
 
-    def job_total_per_queue
+    def jobs_to_run
       job_total_per_queue = Avalanche::Job.job_total_per_queue
 
       columns = job_total_per_queue.keys.map do |queue|
@@ -102,19 +101,43 @@ module Avalanche
       }
     end
 
-    def job_total_per_worker_name
-      job_total_per_worker_name = Avalanche::Job.job_total_per_worker_name
+    def running_jobs_overview
+      running_agents = Avalanche::Job.running_agents
 
-      columns = job_total_per_worker_name.keys.map do |worker|
-        { title: worker, key: worker }
+      columns = running_agents.keys.map do |worker_name|
+        { title: worker_name, key: worker_name }
+      end
+
+      profiles = []
+      running_agents.each do |worker_name, worker_infos|
+        profiles |= worker_infos.keys
       end
 
       lines = []
-      lines[0] = {}
-      job_total_per_worker_name.keys.each do |worker|
-        lines[0]["#{worker}"] = {
-          :value => job_total_per_worker_name[worker][:job_total]
-        }
+      profiles.each do |profile|
+        line = {}
+        running_agents.each do |worker_name, worker_infos|
+          html_queues = "<table style=\"width: 100%\"><tbody><tr>"
+          if worker_infos[profile][:queues].present?
+            worker_infos[profile][:queues].each do |queue|
+              html_queues << "<td class=\"avl-cell-color#{Avalanche::Job.queue_color(queue)}\"></td>"
+            end
+          else
+            html_queues << "<td class=\"avl-cell-color-grey\"></td>"
+          end
+          html_queues << "</tr></tbody></table>"
+
+
+          line[worker_name] = { :value => html_queues }
+        end
+
+        lines << line
+
+        line = {}
+        running_agents.each do |worker_name, worker_infos|
+          line[worker_name] = { :value => "#{worker_infos[profile][:nb_running_job]} / #{worker_infos[profile][:nb_agent]}" }
+        end
+        lines << line
       end
 
       render :json => {
@@ -123,7 +146,7 @@ module Avalanche
       }
     end
 
-    def job_total_per_status
+    def runned_jobs
       job_total_per_status = Avalanche::Job.job_total_per_status
 
       columns = job_total_per_status.keys.map do |status|

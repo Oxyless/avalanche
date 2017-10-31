@@ -4,6 +4,8 @@ require_relative "agent"
 
 module Avalanche
   class AgentPool
+    attr_accessor :worker_name, :agents
+
     def initialize(config)
       @thread_manager = Avalanche::ThreadManager.new
       @agents = Avalanche::SafeArray.new
@@ -11,10 +13,13 @@ module Avalanche
 
       @required_agents = []
       @total_agents = 0
+      @worker_name = config["worker_name"]
 
       config["pool"].each do |p_id, p_config|
         p_config["agents"].times do
-          p_config["profile"]["worker_name"] = config["worker_name"]
+          p_config["profile"]["worker_name"] = @worker_name
+          p_config["profile"]["profile_name"] = p_id
+
           self.need_agent(p_config["profile"])
         end
       end
@@ -24,6 +29,8 @@ module Avalanche
       Thread.abort_on_exception = true
 
       begin
+        Avalanche::Job.remove_deprecated_running_jobs(self.worker_name)
+
         @thread_manager.start_thread do
           self.agents_loop
         end
@@ -35,6 +42,11 @@ module Avalanche
         @thread_manager.start_thread do
           self.timeout_loop
         end
+
+        @thread_manager.start_thread do
+          self.hello_loop
+        end
+
       rescue Exception => e
         puts "EXCEPTION: #{e.inspect}"
         puts "MESSAGE: #{e.message}"
@@ -91,11 +103,10 @@ module Avalanche
     end
 
     def kill_loop
-      while 1
+      loop do
         puts "Kill loop"
 
         Avalanche::AvalancheJob.where(:status => Avalanche::Job::STATUS_KILLME)
-                  .where(:queue => :test)
                   .where(:"avalanche_jobs.agent_id" => @agents.map(&:agent_id))
                   .each do |dothing_job|
 
@@ -115,7 +126,7 @@ module Avalanche
     end
 
     def timeout_loop
-      while 1
+      loop do
         puts "Timeout loop"
 
         @agents.each do |agent|
@@ -140,6 +151,14 @@ module Avalanche
         end
 
         sleep(10)
+      end
+    end
+
+    def hello_loop
+      loop do
+        sleep(5)
+        puts "Hello loop"
+        Avalanche::Job.hello_job(self)
       end
     end
   end

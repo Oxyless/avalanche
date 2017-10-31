@@ -2,5 +2,5 @@
 
 require_relative '../lib/avalanche/cli'
 
-avalanche_cli = Avalanche::Cli.new
+avalanche_cli = Avalanche::Cli.new(ARGV)
 avalanche_cli.run
