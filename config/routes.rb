@@ -1,22 +1,29 @@
 Avalanche::Application.routes.draw do
-  scope module: 'avalanche'  do
-    root :to => 'avalanche#index'
-
-    get 'avalanche/jobs' => 'avalanche#jobs'
 
 
-    get 'avalanche/elements' => 'avalanche#elements'
-    get 'avalanche/mockup' => 'avalanche#mockup'
-    get 'avalanche/test' => 'avalanche#test'
-    get 'avalanche/jobs_to_run' => 'avalanche#jobs_to_run'
-    get 'avalanche/running_jobs' => 'avalanche#running_jobs'
-    get 'avalanche/running_jobs_overview' => 'avalanche#running_jobs_overview'
-    get 'avalanche/runned_jobs' => 'avalanche#runned_jobs'
-    get 'avalanche/all_jobs' => 'avalanche#all_jobs'
-    post 'avalanche/job/kill/:job_id' => 'avalanche#kill_job'
+namespace :avalanche, module: 'avalanche' do
+  root :to => 'page#overview'
+
+  get 'page/overview'      => 'page#overview'
+  get 'page/jobs'          => 'page#jobs'
+  get 'page/queues'        => 'page#queues'
+  get 'page/workers'       => 'page#workers'
 
 
-  end
+  get 'page/elements'      => 'page#elements'
+  get 'page/mockup'        => 'page#mockup'
+  get 'page/test'          => 'page#test'
+
+
+
+  get 'jobs_to_run' => 'avalanche#jobs_to_run'
+  get 'running_jobs' => 'avalanche#running_jobs'
+  get 'running_jobs_overview' => 'avalanche#running_jobs_overview'
+  get 'runned_jobs' => 'avalanche#runned_jobs'
+  get 'all_jobs' => 'avalanche#all_jobs'
+
+  post 'job/kill/:job_id' => 'avalanche#kill_job'
+end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

@@ -1,17 +1,10 @@
-== render partial: "avl_button"
-== render partial: "avl_table"
-== render partial: "menu"
-
 script#content-summary type="text/x-template" 
-  avl-menu :tab-active="tabActive" :logo="logo"
-
-  template v-for="table in tables" :table="table" :key="table.id"
-    div :class="table.class"
-      avl-table :data-source="table.dataSource" :orientation="table.orientation"
-      
-  
-#avalanche.avl-blocs 
-  content-summary
+  div
+    template v-for="table in tables" :table="table" :key="table.id"
+      div :class="table.class"
+        avl-table :title="table.title" :data-source="table.dataSource" :orientation="table.orientation"
+        
+content-summary v-on:update-animation="updateAnimation"
   
 coffee:
   Vue.component('content-summary', {
@@ -20,7 +13,6 @@ coffee:
     
     data: ()->
       return {
-        pulsePath: "/assets/house_static.svg",
         pulseTime: 2000,
         loadCounter: 0,
         totalReload: 0,
@@ -34,18 +26,7 @@ coffee:
         bufferedTables: {}
       }
     ,
-    computed: {
-      logo: ()->
-        "<img src='#{this.pulsePath}' style='width: 50px; margin-right: 15px; margin-bottom: -19px' />"
-    } 
-    ,
     methods: {
-      pulseAnimation: ()->
-        this.pulsePath = "/assets/house_dyn.svg"    
-        setTimeout(() =>
-          this.pulsePath = "/assets/house_static.svg"
-        500)
-    
       getData: ()->
         this.tables.forEach((table) =>    
           $.get(table.dataUrl).done((result) =>
@@ -58,7 +39,7 @@ coffee:
               
               for table in this.tables
                 table.dataSource = this.bufferedTables[table.id]        
-              this.pulseAnimation()
+              this.$emit('update-animation')
                             
               setTimeout(() =>
                 this.getData()
@@ -70,13 +51,4 @@ coffee:
     created: ()->
       this.getData()
   })
-  
-  window.avalanche = new Vue({
-    el: '#avalanche',
-    
-    data: {
-      tabActive: "Résumé"
-    }
-  })
-
       

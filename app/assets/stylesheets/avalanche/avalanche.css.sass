@@ -196,6 +196,37 @@ a.avl-link
       font-size: 13px
       margin-right: 5px
 
+@keyframes glowing2
+  0%
+    box-shadow: 0 0 -10px #ddd
+  20%
+    box-shadow: 0 0 15px #ddd
+  40%
+    box-shadow: 0 0 20px #ddd
+  60%
+    box-shadow: 0 0 20px #ddd
+  80%
+    box-shadow: 0 0 15px #ddd
+  100%
+    box-shadow: 0 0 -10px #ddd
+
+@keyframes glowing
+  0%
+    border: red 1px solid
+  20%
+    border: red 2px solid
+  40%
+    border: red 3px solid
+  60%
+    border: red 2px solid
+  80%
+    border: red 1px solid
+  100%
+    border: red 0px solid
+
+.avl-glowing
+  animation: glowing 0.5s 1
+
 table.avl-table
   width: 100%
 

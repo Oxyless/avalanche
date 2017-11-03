@@ -1,18 +1,8 @@
 module Avalanche
   class AvalancheController < ApplicationController
-    def index
-    end
-
-    def mockup
-    end
-
-    def jobs
-
-    end
-
     def all_jobs
       current_page = (params[:page].present? ? params[:page].to_i : 1)
-      all_jobs, total_page = Avalanche::Job.all_jobs(per_page: 30, page: current_page)
+      all_jobs, total_page = Avalanche::Job.all_jobs(per_page: 20, page: current_page)
 
       columns = [
           { title: "Queue", key: "queue" },

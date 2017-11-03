@@ -1,45 +1,49 @@
 script#avl-cell type="text/x-template" 
-  | {{{ stringContent }}}
-  | {{{ numberContent }}}
-    
-  template v-for="content in arrayContent"
-    avl-button :target="content.target" :type="content.type" :label="content.label"
+  div
+    div v-html="stringContent"
+    div v-html="numberContent"
+      
+    template v-for="content in arrayContent"
+      avl-button :target="content.target" :type="content.type" :label="content.label"
     
 script#avl-table type="text/x-template"
-  template v-if="table.lines.length > 0"
-    template v-if="horizontal"
-      table.avl-table
-        thead
-          tr
-            th v-for="column in table.columns" :class="column.class"
-              avl-cell :value="column.title"
-        
-        tbody
-          template v-for="line in table.lines"
+  div
+    template v-if="table.lines.length > 0"
+      h3.avl-h3
+        | {{ title }}
+      template v-if="horizontal"          
+        table.avl-table :class="avlTableClass"
+          thead
             tr
-              td v-for="column in table.columns" :class="line[column.key].class"
-                avl-cell :value="line[column.key].value"
-
-    template v-if="vertical"
-      table.avl-table  
-        tbody
-          template v-for="column in table.columns"
-            tr
-              td.avl-th :class="column.class"
+              th v-for="column in table.columns" :class="column.class"
                 avl-cell :value="column.title"
+          
+          tbody
+            template v-for="line in table.lines"
+              tr
+                td v-for="column in table.columns" :class="line[column.key].class"
+                  avl-cell :value="line[column.key].value"
 
-              td v-for="line in table.lines" :class="line[column.key].class"
-                avl-cell :value="line[column.key].value"
-    
-    template v-if="multipage"
-      .avl-pagination
-        input type="number" min="1" :value="currentPage" class="avl-current-page" v-model="currentPage" @change="getData()"
-        
-        span
-          | / {{ dataTable.pagination.totalPage }}
+      template v-if="vertical"
+        table.avl-table  
+          tbody
+            template v-for="column in table.columns"
+              tr
+                td.avl-th :class="column.class"
+                  avl-cell :value="column.title"
 
-  template v-else=""
-    div 
+                td v-for="line in table.lines" :class="line[column.key].class"
+                  avl-cell :value="line[column.key].value"
+      
+      template v-if="multipage"
+        .avl-pagination
+          input type="number" min="1" class="avl-current-page" v-model="currentPage" @change="getData()"
+          
+          span
+            | / {{ dataTable.pagination.totalPage }}
+
+    template v-else=""
+      div
       
    
 coffee:
@@ -47,7 +51,7 @@ coffee:
     template: '#avl-cell',
     props: [ "value" ],
     
-    computed:
+    computed:      
       numberContent: ()->
         if typeof this.value is 'number'
           return this.value
@@ -66,18 +70,34 @@ coffee:
   
   Vue.component('avl-table', {
     template: '#avl-table',
-    props: [ 'dataUrl', 'dataSource', 'orientation', 'multipage', 'currentPage' ],
+    props: [ 
+      'dataUrl', 
+      'dataSource', 
+      'orientation', 
+      'multipage',
+      'autoUpdate',
+      'title'
+    ],
     
     data: ()-> 
       {
-        dataTable: { 
+        updateCounter: 0,
+        dataUpdated: false,
+        currentPage: 1,
+        
+        dataTable: {   
           columns: [],
           lines: [],
           pagination: { totalPage: 1 }
         }
       }
     ,
-    computed: {        
+    computed: {      
+      avlTableClass: ()->
+        return {
+          "avl-glowing": false
+        }
+      
       totalPage: ()->
         if this.multipage
           return this.dataTable.pagination.totalPage
@@ -98,10 +118,17 @@ coffee:
           
     }
     ,
+    watch: {
+      dataUpdated: ()->
+        if this.dataUpdated == true
+          this.$emit('update-animation') 
+    }  
+    ,
     methods: {
       getData: ()->
         url = this.dataUrl  
-        
+        this.dataUpdated = false
+          
         if this.multipage
           unless this.currentPage
             this.currentPage = 1
@@ -109,16 +136,27 @@ coffee:
           if this.currentPage < 1
             this.currentPage = 1
           if this.currentPage > this.dataTable.pagination.totalPage
-            this.currentPage = this.dataTable.pagination.totalPage
+            this.currentPage = Number(this.dataTable.pagination.totalPage)
+                  
+          url = "#{this.dataUrl}?page=#{this.currentPage}"
+          
+          this.updateCounter += 1
+          currentupdateCounter = this.updateCounter  
+                  
+          $.get(url).done((result) =>
+            if currentupdateCounter == this.updateCounter
+              this.dataTable.columns = result.columns
+              this.dataTable.lines = result.lines       
+              this.dataTable.pagination = result.pagination
+              this.dataUpdated = true
+              
+              if this.autoUpdate && Number(this.currentPage) == 1
+                setTimeout(() =>
+                  if this.updateCounter == currentupdateCounter
+                    this.getData()
+                3000)
+          )
 
-            
-          url = "#{this.dataUrl}?page=#{this.currentPage}" 
-
-        $.get(url).done((result) =>
-          this.dataTable.columns = result.columns
-          this.dataTable.lines = result.lines       
-          this.dataTable.pagination = result.pagination    
-        )
     }
     ,
     created: ()->
